@@ -13,11 +13,17 @@
 
 ```
 /etc/nixos
-├── flake.nix                    # Flake 入口：定义输入、系统与模块
+├── flake.nix                    # Flake 入口：声明输入，导入各模块
 ├── flake.lock                   # 锁定各输入的确切版本（自动生成，勿手改）
-├── configuration.nix            # 系统级配置（引导、网络、桌面、软件包……）
 ├── hardware-configuration.nix   # 硬件配置（由 nixos-generate-config 生成，勿手改）
 ├── home.nix                     # 用户级配置（home-manager，管理 youth 用户）
+├── modules/                     # 系统级配置，按主题拆分
+│   ├── core.nix                 # 引导、网络、时区、Nix 缓存、nix-ld
+│   ├── desktop.nix              # niri（Wayland 合成器）+ greetd
+│   ├── proxy.nix                # clash-verge + TUN 防火墙调整
+│   ├── users.nix                # 用户与 shell
+│   ├── packages.nix             # 系统软件包
+│   └── fonts.nix                # 字体
 └── README.md                    # 本文件
 ```
 
@@ -25,8 +31,13 @@
 
 | 文件 | 层级 | 说明 |
 | --- | --- | --- |
-| `flake.nix` | 入口 | 声明 `nixpkgs` 与 `home-manager` 输入，组装 `nixosConfigurations.nixos` |
-| `configuration.nix` | 系统 | 系统级选项：引导、网络、防火墙、桌面、用户、包、Nix 设置 |
+| `flake.nix` | 入口 | 声明 `nixpkgs` 与 `home-manager` 输入，导入各模块并组装 `nixosConfigurations.nixos` |
+| `modules/core.nix` | 系统 | 引导、网络、防火墙基础、时区、Nix 设置、nix-ld、`stateVersion` |
+| `modules/desktop.nix` | 系统 | niri 合成器与 greetd 登录管理器 |
+| `modules/proxy.nix` | 系统 | Clash Verge 及 TUN 模式防火墙规则 |
+| `modules/users.nix` | 系统 | 用户 `youth` 与 zsh |
+| `modules/packages.nix` | 系统 | 系统级软件包 |
+| `modules/fonts.nix` | 系统 | 系统字体 |
 | `hardware-configuration.nix` | 硬件 | 文件系统挂载、内核模块、CPU 微码等，由硬件探测生成 |
 | `home.nix` | 用户 | 用户 `youth` 的家目录配置、dotfiles、用户级软件包 |
 | `flake.lock` | 依赖 | 锁定 flake 输入的提交哈希，保证可复现 |
@@ -49,7 +60,7 @@
 
 - **交换分区**：未配置（`swapDevices = []`）
 
-> ⚠️ `hardware-configuration.nix` 由 `nixos-generate-config` 自动生成，重新生成时会被覆盖。所有自定义改动应写入 `configuration.nix`。
+> ⚠️ `hardware-configuration.nix` 由 `nixos-generate-config` 自动生成，重新生成时会被覆盖。所有自定义改动应写入 `modules/` 下的对应模块。
 
 ---
 
@@ -242,7 +253,7 @@ sudo nixos-rebuild switch --flake /etc/nixos#nixos   # 换到某代需用系统�
 
 ## 版本说明
 
-- `system.stateVersion = "26.05"`（见 `configuration.nix`）
+- `system.stateVersion = "26.05"`（见 `modules/core.nix`）
 - `home.stateVersion = "26.05"`（见 `home.nix`）
 
 **不要**随意修改 `stateVersion`：它用于标记首次安装的版本，控制数据迁移行为。跨大版本升级时按发行说明调整，通常保持安装时的值不变。
@@ -251,7 +262,7 @@ sudo nixos-rebuild switch --flake /etc/nixos#nixos   # 换到某代需用系统�
 
 ## 注意事项
 
-1. **不要手改 `hardware-configuration.nix`**，自定义内容写入 `configuration.nix`。
+1. **不要手改 `hardware-configuration.nix`**，自定义内容写入 `modules/` 下的对应模块。
 2. **不要手改 `flake.lock`**，使用 `nix flake update` 更新。
 3. 修改配置后，务必先 `build` 或 `test` 验证，再 `switch`，避免系统进入不可用状态。
 4. Clash Verge 若 TUN 模式不通，优先检查虚拟网卡名是否与防火墙白名单（`Mihomo` / `Meta`）一致。
