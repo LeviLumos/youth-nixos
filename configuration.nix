@@ -13,28 +13,24 @@
   networking.networkmanager.enable = true;
   networking.hostName = "nixos";
 
-  # ── 时区与本地化 ─────────────────────────────────────────
-  time.timeZone = "Asia/Shanghai";
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  # ── 桌面环境：Plasma 6 ───────────────────────────────────
-  # Plasma 5 在 25.05 之后已不可用，26.05 必须使用 plasma6
-  services.xserver.enable = true;
   services.openssh = {
     enable = true;
     openFirewall = true;
   };
 
-  services.displayManager.sddm = {
+  # ── 时区与本地化 ─────────────────────────────────────────
+  time.timeZone = "Asia/Shanghai";
+  i18n.defaultLocale = "en_US.UTF-8";
+
+  # ── 桌面环境：niri（Wayland 合成器）+ greetd ──────────────
+  programs.niri.enable = true;
+
+  services.greetd = {
     enable = true;
-    # 可选：启用 Wayland 下的 SDDM（实验性）
-    # wayland.enable = true;
+    useTextGreeter = true;
+    settings.default_session.command =
+      "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --sessions ${config.services.displayManager.sessionData.desktops}/share/wayland-sessions";
   };
-
-  services.desktopManager.plasma6.enable = true;
-
-  # 默认使用 X11 会话（Plasma 6 默认是 Wayland，如需 X11 取消注释）
-  services.displayManager.defaultSession = "plasmax11";
   programs.nix-ld = {
     enable = true;
     libraries = with pkgs; [
@@ -69,19 +65,32 @@
     '';
   };
 
+  # ── 用户与 shell ────────────────────────────────────────
+  programs.zsh.enable = true;
+
+  users.users.youth = {
+    isNormalUser = true;
+    description = "youth";
+    shell = pkgs.zsh;
+    extraGroups = [ "networkmanager" "wheel" "root" "users" ];
+  };
+
   # ── 系统软件包 ───────────────────────────────────────────
   environment.systemPackages = with pkgs; [
-    vim
-    alacritty
-    git
-    firefox
     clash-verge-rev
     mihomo
-    mise
+  ];
+
+  # ── 字体 ─────────────────────────────────────────────────
+  # Maple Mono CN（Nerd Font 变体）：等宽编程字体，含中文字形与图标
+  # 通过 fc-list | grep -i maple 验证安装结果
+  fonts.packages = with pkgs; [
+    maple-mono.NF-CN
   ];
 
   # ── Nix 二进制缓存（国内镜像加速） ──────────────────────
   nix.settings = {
+    experimental-features = [ "nix-command" "flakes" ];
 
     substituters = [
       "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
