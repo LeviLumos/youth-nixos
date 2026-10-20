@@ -67,6 +67,91 @@
         [ -f ~/.zsh_secrets ] && source ~/.zsh_secrets   # 存放敏感变量（勿提交到 Git）
         [ -f ~/.zsh_local ] && source ~/.zsh_local       # 存放机器专属别名（勿提交到 Git）
 
+        # --------------------------------------------------------------------
+        # 一、环境变量
+        # --------------------------------------------------------------------
+        export EDITOR=nvim           # 默认编辑器（git / crontab 等会读取）
+        export VISUAL=nvim           # 需要全屏编辑的程序（如 git commit）
+        export SYSTEMD_EDITOR=nvim   # systemctl edit 等 systemd 命令使用的编辑器
+        export MANPAGER="sh -c 'col -bx | bat -l man -p'"  # man 手册交给 bat 渲染（高亮 + 分页）
+        export BAT_THEME=Catppuccin-mocha  # 与 tool.nix 中 catppuccin.bat 的 flavor 保持一致
+
+        # --------------------------------------------------------------------
+        # 二、命令历史
+        # 说明：也可改用声明式写法 programs.zsh.history = { size = 10000; ... };
+        #       此处直接写 setopt，便于集中查看与临时调整。
+        # --------------------------------------------------------------------
+        export HISTSIZE=10000           # 内存中保留的历史条数
+        export SAVEHIST=10000           # 落盘保存的历史条数
+        export HISTFILE=~/.zsh_history  # 历史文件路径
+        setopt APPEND_HISTORY           # 多终端追加写入，而非互相覆盖
+        setopt INC_APPEND_HISTORY       # 命令执行完立即写入，不必等 shell 退出
+        setopt HIST_IGNORE_ALL_DUPS     # 重复命令只保留一条
+        setopt HIST_IGNORE_SPACE        # 以空格开头的命令不记录（临时隐私命令）
+        setopt HIST_REDUCE_BLANKS       # 去除历史记录中多余的空格
+        setopt HIST_VERIFY              # 历史展开（!! 等）先显示，回车确认后再执行
+
+        # --------------------------------------------------------------------
+        # 三、交互行为
+        # --------------------------------------------------------------------
+        setopt AUTO_CD                # 只输入目录名即可进入该目录（省去 cd）
+        setopt CORRECT                # 目录名拼错时给出纠正提示
+        setopt INTERACTIVE_COMMENTS   # 允许在命令行中用 # 书写注释
+        unsetopt BEEP                 # 出错时不发出系统蜂鸣声
+        stty -ixon 2>/dev/null        # 解除 Ctrl+S / Ctrl+Q 流控，把 Ctrl+S 让给程序（如 fzf）
+
+        # --------------------------------------------------------------------
+        # 四、补全外观
+        # 说明：compinit 由 home-manager 自动调用（programs.zsh.enableCompletion 默认开启），
+        #       这里只写 zstyle，避免重复初始化补全系统。
+        # --------------------------------------------------------------------
+        zstyle ':completion:*' menu select                   # 方向键选择候选，而非逐个循环填充
+        zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'  # 大小写不敏感补全
+        zstyle ':completion:*' special-dirs true             # 支持 ../.. 这类特殊目录补全
+        zstyle ':completion:*' rehash true                   # 新安装命令无需重开 shell 也能补全
+        zstyle ':completion:*' list-colors "di=34:ln=35:so=32:ex=31"  # 候选按类型着色：蓝目录/紫软链等
+
+        # --------------------------------------------------------------------
+        # 五、按键绑定（vi 风格编辑）
+        # 说明：bindkey -v 启用 vi 行编辑后，
+        #       Esc / Ctrl+[ 进入 normal 模式（移动、删除、粘贴），i / a 回到插入模式。
+        #       fzf 的 Ctrl+R / Ctrl+T / Alt+C 在插入模式下照常可用。
+        # --------------------------------------------------------------------
+        export KEYTIMEOUT=1            # Esc 后的判定等待压缩到最小（10ms），模式切换不再卡顿
+        bindkey -v                     # vi 风格行编辑（关键开关）
+
+        # ---- 两种模式通用的光标移动 ----
+        bindkey -M viins '^[[H' beginning-of-line  # Home：跳到行首（插入模式）
+        bindkey -M viins '^[[F' end-of-line        # End：跳到行尾（插入模式）
+        bindkey -M vicmd '^[[H' beginning-of-line  # Home：跳到行首（normal 模式）
+        bindkey -M vicmd '^[[F' end-of-line        # End：跳到行尾（normal 模式）
+        bindkey -M vicmd 'H' beginning-of-line     # normal 模式 H：跳到行首
+        bindkey -M vicmd 'L' end-of-line           # normal 模式 L：跳到行尾
+
+        # ---- 删除与行编辑 ----
+        bindkey -M viins '^[[3~' delete-char       # Delete：删除光标处字符（插入模式）
+        bindkey -M vicmd '^[[3~' delete-char       # Delete：删除光标处字符（normal 模式）
+        bindkey -M viins '^U' backward-kill-line   # Ctrl+U：删除到行首，而不是整行
+        bindkey -M viins '^[[1;5C' forward-word    # Ctrl+右：右移一个单词
+        bindkey -M viins '^[[1;5D' backward-word   # Ctrl+左：左移一个单词
+
+        # ---- normal 模式下用 $EDITOR 编辑当前命令行 ----
+        autoload -Uz edit-command-line && zle -N edit-command-line  # 注册 edit-command-line 部件
+        bindkey -M vicmd 'v' edit-command-line  # 按 v 打开 nvim 编辑长命令，写盘后自动执行
+
+        # --------------------------------------------------------------------
+        # 六、常用小函数
+        # --------------------------------------------------------------------
+        mkcd() { mkdir -p "$1" && cd "$1"; }  # 创建目录并立即进入
+
+        # 登录时显示系统信息（会略微拖慢终端启动，需要请去掉下一行注释）
+        # fastfetch
+
+        # --------------------------------------------------------------------
+        # Seven、config about app
+        # --------------------------------------------------------------------
+        eval "$(mise activate zsh)" # activate mise in zsh
+
         # ---- 以下为「切换到 powerlevel10k」所需的加载语句 ----
         # source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
         # [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh

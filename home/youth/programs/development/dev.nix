@@ -41,5 +41,12 @@
     cmake # 跨平台构建系统生成器
     gnumake # Make 构建工具
     ninja # Ninja：比 make 更快的构建执行器
+    mise
   ];
+
+  # config about git
+  programs.git = {
+    userName = "LeviLumos";
+    userEmail = "v22to.me@gmail.com";
+  };
 }
