@@ -1,0 +1,182 @@
+/* ============================================================================
+ * app.rasi —— rofi 应用启动器主题
+ * ----------------------------------------------------------------------------
+ * 安装位置：~/.config/rofi/themes/app.rasi（由 ../rofi.nix 分发）
+ * 使用方式：rofi -show drun -theme ~/.config/rofi/themes/app.rasi
+ *           Hyprland 中绑定为 Super+D（见 ../../hyprland/hypr/hyprland.lua）
+ *
+ * 视觉风格：柔和粉紫基调（Catppuccin Mocha 色系），大圆角 + 半透明背景。
+ *
+ * rasi 语法要点：
+ *   * { ... }               全局默认样式
+ *   @变量名 / @变量          定义与引用可复用变量
+ *   部件名 { ... }           设置某个部件的样式
+ *   children: [ "a", "b" ]  指定部件的层级结构
+ *   /* ... */               C 风格注释
+ * ========================================================================== */
+
+/* ---- 行为配置（可被命令行参数覆盖）---- */
+configuration {
+    modi:                      "drun";      // 固定为「应用启动器」模式
+    show-icons:                true;
+    display-drun:              " Applications";
+    drun-display-format:       "{name}";
+}
+
+/* ============================================================================
+ * 全局配色变量
+ * 说明：取自 Catppuccin Mocha 调色板；修改此处即可整体换色
+ * ========================================================================== */
+* {
+    /* 柔和粉紫基调 */
+    base-bg:                    rgba(30, 30, 46, 0.85);   // 窗口背景：半透明深紫（Base）
+    selected-bg:                #6c7086;                 // 选中项背景（Overlay0）
+    border:                     #f4b8e4;   /* #F4B8E4 */  // 边框：淡粉色
+    selected:                   #5c5f77;                 // 输入栏底色（Surface2）
+    prompt:                     #313244;                 // 提示标签底色（Surface0）
+    background-color:           transparent;             // 默认背景透明
+    text-color:                 #cdd6f4;                 // 默认文字色（Text）
+}
+
+/* ---- 窗口本体：尺寸、圆角、描边 ---- */
+window {
+    width:                       30%;       // 宽度为屏幕的 30%
+    border-radius:               20px;      // 圆角（下一行的 1.2em 会覆盖此值）
+    border:                      2px;       // 边框宽度
+    border-radius:               1.2em;     // 实际生效的圆角（em 随字号缩放）
+    border-color:                @border;   // 边框颜色
+    background-color:            @base-bg;  // 窗口背景
+    cursor:                      "default";
+}
+
+/* ---- 主容器：输入栏 + 候选列表 ---- */
+mainbox {
+    spacing:                     1em;       // 输入栏与列表的间距
+    margin:                      2em;       // 四周留白
+    padding:                     0px;
+    // border:                      0px solid;
+    // border-radius:               0px 0px 0px 0px;
+    // border-color:                @selected;
+    // background-color:            transparent;
+    children:                    [ "inputbar", "listview" ];  // 子部件顺序
+}
+
+/*****----- Inputbar 输入栏 -----*****/
+inputbar {
+    // enabled:                     true;
+    // spacing:                     0px;
+    // margin:                      0px;
+    // padding:                     0px;
+    // border:                      0px solid;
+    border-radius:               100%;      // 胶囊形输入框
+    border-color:                @selected;
+    background-color:            @selected;
+    children:                    [ "prompt", "textbox-prompt-colon", "entry" ];
+}
+
+/* 左侧圆形标签：显示应用启动器的图标提示 */
+prompt {
+    padding: 15px;
+    border-radius: 100%;
+    background-color: @prompt;
+}
+
+/* 提示与输入框之间的冒号分隔符 */
+textbox-prompt-colon {
+    expand:                      false;     // 不额外占据横向空间
+    str:                         "::";      // 显示的文本
+    padding:                     15px;
+}
+
+/* 文本输入框 */
+entry {
+    padding:                     15px 0px;  // 左右内边距为 0
+    cursor:                      text;      // 光标为竖线（文本输入样式）
+    placeholder:                 "Search...";  // 无输入时的占位提示
+}
+
+/*****----- Listview 候选列表 -----*****/
+listview {
+    lines:                       6;         // 固定显示 6 行
+    cycle:                       true;      // 结果循环滚动
+    dynamic:                     true;      // 启用模糊匹配（边输入边筛选）
+    scrollbar:                   false;     // 不显示滚动条
+    layout:                      vertical;  // 垂直排列
+    reverse:                     false;     // 不反向（最新项在上）
+    fixed-height:                true;      // 高度固定，与 lines 配合
+    fixed-columns:               true;
+
+    spacing:                     15px;      // 行间距
+    margin:                      0px;
+    padding:                     0px;
+    border:                      0px solid;
+    border-radius:               0px;
+    border-color:                @selected;
+    background-color:            transparent;
+    cursor:                      "default";
+}
+
+/* 滚动条（当前已禁用，保留样式备用） */
+scrollbar {
+    handle-width:                5px ;      // 滑块宽度
+    handle-color:                @selected; // 滑块颜色
+    border-radius:               0px;
+    background-color:            @selected; // 轨道颜色
+}
+
+/*****----- Elements 候选项 -----*****/
+element {
+    enabled:                     true;
+    spacing:                     10px;      // 图标与文字之间的间距
+    margin:                      0px;
+    padding:                     0px;
+    border:                      0px solid;
+    border-radius:               0px;
+    border-color:                @selected;
+    background-color:            transparent;
+    orientation:                 horizontal;  // 图标在左、文字在右
+    cursor:                      pointer;    // 鼠标显示为手型
+}
+/* 未选中状态 */
+element normal.normal {
+    background-color:            transparent;
+}
+
+/* 选中状态：胶囊形高亮底色 */
+element selected.normal {
+    border-radius:               100%;
+    background-color:            @selected-bg;
+}
+
+/* 应用图标 */
+element-icon {
+    padding:                     0.3em;
+    border-radius:               100%;
+    size:                        1.8em;      // 图标尺寸
+    cursor:                      inherit;   // 沿用父部件的鼠标样式
+}
+/* 应用名称文字 */
+element-text {
+    background-color:            transparent;
+    font:                        "mono 16";  // 等宽字体 16 号
+    cursor:                      inherit;
+    vertical-align:              0.5;        // 垂直居中
+    horizontal-align:            0.0;        // 左对齐
+}
+
+/*****----- Message 无结果提示 -----*****/
+/* 没有任何匹配项时显示的错误框 */
+error-message {
+    padding:                     20px;
+    border:                      2px solid;
+    border-radius:               20px;
+    border-color:                @selected;
+    background-color:            @base-bg;
+}
+/* 通用文本框 */
+textbox {
+    background-color:            @base-bg;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+    highlight:                   none;      // 取消文字高亮
+}

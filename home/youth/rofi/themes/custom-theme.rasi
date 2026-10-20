@@ -1,0 +1,269 @@
+/* ============================================================================
+ * custom-theme.rasi —— rofi 基础主题（含模式切换栏）
+ * ----------------------------------------------------------------------------
+ * 安装位置：~/.config/rofi/themes/custom-theme.rasi（由 ../rofi.nix 分发）
+ * 引用位置：config.rasi 末尾的 `@theme "./themes/custom-theme.rasi"`
+ *           即所有未显式指定 -theme 的 rofi 调用都会使用本主题。
+ *
+ * 特点：
+ *   左侧带「模式切换栏」（mode-switcher），可在 drun / window / run /
+ *   filebrowser 等模式之间快速切换，功能比单一模式主题更完整。
+ *
+ * rasi 语法要点：
+ *   @变量名           引用 * 块中定义的变量
+ *   inherit           继承父部件的同名属性
+ *   children: [a, b]  子部件层级
+ * ========================================================================== */
+
+/**
+* 配色变量集中定义区
+* 用法：先定义变量名，之后在任意部件中用 @变量名 引用。
+* 例如：red：#CD5C5C；   然后写 text-color: @red;
+*/
+* {
+   background-color: transparent;   // 默认背景透明，便于叠加桌面背景
+
+   // ---- 背景色阶 ----
+   bg: #262626;         // 背景
+   el: #171717;         // 元素底色
+   lightel:#404040;     // 浅元素底色
+   darkel: #57534e;     // 深元素底色
+   title: #ebb619;      // 标题色
+
+   // 白中带灰
+   white: #e9ecef;
+
+   // Grape-葡萄紫
+   grape: #cc5de8;
+   darkgrape: #ae3ec9;
+   lightgrape: #e599f7;
+
+   // Gray-灰色
+   gray: #adb5db;
+   trangray:rgba(173, 181, 219, 0.69); // 透明灰（半透明叠加用）
+   lightgray: #ced4da;
+   darkgray: #191b1e;
+
+   // Pink-粉色
+   pink: #e64980;
+   lightpink: #f06595;
+
+   // Teal-青色（本主题的主强调色）
+   teal: #12b886;
+   lightteal: #20c997;
+
+   // Blue-蓝色
+   // violet: #546e7a;  // 备选色，保留备用
+   grayblue: #546e7a;
+   darkblue: #064554;
+
+
+   // Violet-紫罗兰
+   lightviolet: #673fe6;
+
+   // Orange-橙色
+   orange: #ff922b;
+
+   // ---- 透明度级别 ----
+   transparent:rgba(0,0,0,0); // 完全透明
+   translucent:rgba(0, 0, 0, 0.7); // 黑色半透明
+   whitetranslucent:rgba(255, 255, 255, 0.2); // 白色半透明
+
+   // ---- 与其它 rofi 主题统一的基色（Catppuccin Mocha 系）----
+   base-bg: rgba(30, 30, 46, 0.85);
+   selected-bg: #6c7086;
+
+   background-color: transparent;
+   text-color: #cdd6f4;
+
+}
+
+/**
+* 主窗口：尺寸、透明度、边框与内容层级
+* 说明：后续各部件都渲染在这个 window 之内。
+*/
+window {
+   background-color: @base-bg;
+   transparency: "real"; // 真实透明（可看到桌面壁纸）
+   border:2px;                // 边框宽度
+   border-radius:1.2em;       // 圆角
+   border-color: #f4b8e4;   /* #F4B8E4 */  // 边框：淡粉色
+   location:center;           // 窗口居中
+   y-offset:-25;              // 相对居中位置再向上偏移 25px
+   children:[mainbox];        // 内容层级：window -> mainbox
+}
+
+/* ---- 主容器：输入栏 + 列表（列表中含模式切换栏）---- */
+mainbox {
+   padding:1.2em;             // 内边距
+   spacing:0.6em;             // 子部件间距
+   // background-color:inherit;
+   children:[inputbar, listbox];
+}
+
+/* ---- 输入栏：带青色描边 ---- */
+inputbar {
+   spacing:0em;
+   // padding:0.5em;
+   margin:1em 4em;            // 上下 1em、左右 4em 外边距
+   border-radius:0.8em;       // 圆角
+   border:2px;
+   border-color:@lightteal;   // 青色描边
+   // background-color:@darkgray;
+   children:[textbox-prompt-colon, entry];
+}
+
+textbox-prompt-colon {
+    enabled:true;
+    expand:false;
+    str:"";
+    font:"FiraCode Nerd Font Mono 20";     // 图标专用字体
+       padding:0.01em 1em;
+       text-color:@teal;
+    }
+
+    // 当前输入项的图标（当前未启用）
+    // icon-current-entry {
+    //     size:1.1em;
+    // }
+
+    /* ---- 输入框 ---- */
+    entry {
+       cursor-color:@white;       // 光标颜色
+       placeholder:"Search";      // 占位提示
+       placeholder-color:@lightteal;
+       text-color:@teal;          // 输入文字颜色
+       vertical-align:0.5;
+       font:"FiraCode Nerd Font Mono 12";  // 等宽字体 12 号
+    }
+
+    /* ---- 列表外框：水平排列（左侧模式栏 + 右侧候选列表）---- */
+    listbox {
+       padding:1em 0em;
+       orientation:horizontal;    // 水平布局
+       vertical-align:0.5;
+       horizontal-align:0.5;
+       background-color:@transparency;   // 完全透明
+       children:[mode-switcher, listview];
+    }
+
+    /* ---- 候选列表：2 列 4 行 ---- */
+    listview {
+       padding:0.6em;
+       spacing:0.5em;             // 行间距
+       lines: 4; // 限制最大行数
+       columns:2; // 显示两列
+       children:[element];
+       background-color:transparent;
+    }
+
+
+    /* ---- 单个候选项：图标 + 文字，胶囊形 ---- */
+    element {
+       children: [element-icon, element-text];
+       spacing: 0.1em; // 图标文字的间距
+       orientation:horizontal;
+       cursor:pointer;    // 鼠标为手型
+       padding:0.5em;     // 内边距
+       // background-color:@darkgray;
+       border-radius:100%;  // 完全圆角
+    }
+
+    /* ---- 候选项文字 ---- */
+    element-text {
+       font:inherit;              // 继承全局字体设置
+       text-color:@lightgray;
+       vertical-align:0.5;
+       background-color:inherit;  // 背景继承父级，避免出现色块
+    }
+
+    /* ---- 候选项图标 ---- */
+    element-icon {
+       size:1em;                  // 与文字等高
+       background-color:inherit;
+    }
+
+
+    /* ---- 左侧模式切换栏 ---- */
+    mode-switcher {
+       enabled:true;
+       width:4em;                 // 固定宽度
+       padding:0.6em;
+       spacing:0.5em;
+       orientation:vertical;      // 按钮竖排
+       // background-color:transparent;
+    }
+
+    /* ---- 模式切换按钮 ---- */
+    button {
+       cursor:pointer;
+       border-radius:1em;
+       text-color:@gray;
+       background-color:@whitetranslucent;  // 白色半透明底
+       // background-color:red;
+       font:"FiraCode Nerd Font Mono 22";  // 图标字体，字号较大
+    }
+
+    /* ---- 当前选中的模式按钮 ---- */
+    button selected {
+       background-color:@trangray;
+       text-color:@lightteal;
+    }
+
+    /**
+    * 候选项状态高亮（改变背景/文字颜色）
+    * rofi 提供四种状态，两两组合可覆盖全部情况：
+    *   normal    普通
+    *   active    当前获得焦点（鼠标悬停或键盘选中）
+    *   urgent    紧急（部分模式用于标记特殊项，如 urgent 窗口）
+    *   selected  已确定选中（回车前的高亮态）
+    * 另外 alternate 表示列表中的偶数行（用于隔行变色）。
+    */
+
+    element normal active {
+       text-color:@teal;         // 焦点项：文字变青色
+    }
+
+    element normal urgent {
+       text-color:@grayblue;     // 紧急项：文字变蓝灰
+    }
+
+    element selected normal {
+       background-color:@grayblue;  // 选中普通项：蓝灰底色
+    }
+
+    element normal active {
+       background-color: @grayblue;  // 焦点项底色
+    }
+
+    element normal urgent {
+       foreground: red;          // 紧急项前景色
+    }
+
+    // 隔行颜色不同（当前未启用，需要时可取消注释）
+    // element alternate normal {
+    //     background-color:@darkel;
+    // }
+    // element alternate active {
+    //     background-color: @lightviolet;
+    // }
+
+    element alternate urgent {
+       foreground: red;
+    }
+
+    element selected active {
+       background-color: @darkblue;  // 选中且获得焦点：深蓝底
+    }
+
+    element selected urgent {
+       background-color: red;        // 选中且紧急：红底
+    }
+
+    /* ---- 无结果时的错误提示框 ---- */
+    error-message {
+       background-color: @white;
+       padding: 0.5em;
+       border-radius:1em;
+       font:"Hack Nerd Font Mono 18";
+    }
