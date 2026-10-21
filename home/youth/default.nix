@@ -29,7 +29,7 @@
     ./programs # 各类应用程序与开发工具
     ./terminal # kitty / alacritty 终端
     ./niri # Niri 滚动平铺桌面环境
-    ./hyprland # Hyprland 桌面环境
+    # ./hyprland # Hyprland 桌面环境
     ./noctalia # Noctalia 状态栏与菜单
     ./fcitx5 # 中文输入法
     ./rofi # 应用启动器与截图工具
