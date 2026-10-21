@@ -1,0 +1,58 @@
+#compdef koru
+# _koru —— koru CLI 的 Zsh 补全（compdef 框架）：两级子命令补全。
+# file/click 是带自己参数的工具型子命令，直接用 _arguments 补全；
+#   其余 group 用状态机：先补 group 名，再按 group 补 action，
+#   最后按 action 补 --generation 或从 modules-enables.nix 解析出模块名列表。
+# 安装：lib/koru-package.nix 放入 fpath（site-functions）。
+
+_koru() {
+  # file 子命令：补文件路径与 --host/--port
+  if [[ $words[2] == file ]]; then
+    _arguments '2:file:_files' \
+      '--host=[LAN IPv4 address]:address:' \
+      '--port=[listen port (default 8080)]:port:' \
+      '(-h --help)'{-h,--help}'[show help]'
+    return
+  fi
+  # click 子命令：补 toggle/start/stop/status 与 --frequency
+  if [[ $words[2] == click ]]; then
+    _arguments '2:action:(toggle start stop status)' \
+      '--frequency=[clicks per second]:frequency:' \
+      '(-h --help)'{-h,--help}'[show help]'
+    return
+  fi
+  local context state line
+  typeset -A opt_args
+  _arguments -C \
+    '(-h --help)'{-h,--help}'[show help]' \
+    '1:group:(system home profile proxy store click file)' \
+    '2:action:->action' \
+    '*::options:->options'
+  # 按第一个词补对应 action 列表
+  case $state in
+    action)
+      case $words[2] in
+        system) _values action build check list rollback ;;
+        home) _values action build check list rollback modules enable disable validate ;;
+        profile) _values action build check status list rollback ;;
+        proxy) _values action status list refresh start stop autostart ;;
+        store) _values action status gc ;;
+      esac
+      ;;
+    # rollback 补 --generation；home enable/disable 从开关板文件提取模块名做动态补全
+    options)
+      if [[ $line[2] == rollback ]]; then
+        _arguments '--generation=[generation ID]:generation ID:'
+      elif [[ $line[1] == home && ( $line[2] == enable || $line[2] == disable ) ]]; then
+        local file=$HOME/.config/nixos/home/modules-enables.nix
+        local -a modules
+        if [[ -r $file ]]; then
+          modules=("${(@f)$(sed -nE 's/^[[:space:]]*([-A-Za-z0-9]+)[[:space:]]*=[[:space:]]*(true|false);.*$/\1/p' "$file")}")
+          _wanted modules expl 'home module' compadd -a modules
+        fi
+      fi
+      ;;
+  esac
+}
+
+_koru "$@"

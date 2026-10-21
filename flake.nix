@@ -1,178 +1,239 @@
-# ============================================================================
-# flake.nix —— NixOS 配置仓库的入口声明文件
-# ----------------------------------------------------------------------------
-# 作用：
-#   1. 声明本配置所依赖的全部外部输入（inputs），即各个 GitHub 仓库的版本；
-#   2. 通过 nixConfig 声明二进制缓存加速源（ substituter ），避免本地编译；
-#   3. 组装 NixOS 系统配置 `nixosConfigurations.levi` ，并在系统层挂载
-#      home-manager，使 `home/youth` 下的用户级声明（程序、主题、键位等）生效。
+# --- flake ---
+# NixOS flake: flake-parts composition + home-manager.
 #
-# 使用方式：
-#   查看可用的 flake 输出      nix flake show
-#   构建系统并切换            nixos-rebuild switch --flake .#levi   （需 root）
-#   仅构建不切换（dry-run）    nixos-rebuild build --flake .#levi
-#   进入开发 Shell             nix develop
+# One selection decides what the user layer installs: home/modules-enables.nix, one
+# boolean per home module (the single switchboard and the inventory of what
+# home/ can install). home/default.nix asserts it matches the module directory.
 #
-# 依赖关系说明：
-#   nixpkgs 是所有其他输入的公共基座，因此这里让 home-manager、CookNixvim
-#   都 `follows = "nixpkgs"` ，保证整个系统使用同一份 nixpkgs，避免出现
-#   同一软件被编译出多份不同 store 路径的问题。
-# ============================================================================
+# Outputs:
+#   - nixosConfigurations.<host> : full system, with home-manager embedded for
+#     that host, switchboard from home/modules-enables.nix.
+#   - homeConfigurations.<host>  : user layer only, switchboard as-is. Can be
+#     switched at runtime (`home-manager switch --flake .#<host>`).
+#   - homeConfigurations.all     : every user module forced on, evaluation
+#     only, so a disabled/unsupported module cannot rot unnoticed.
+#
+# 【中文说明】全仓库总入口：
+# 是什么 —— 用 flake-parts 组织的 NixOS + home-manager 配置 flake。
+# 结构 —— hosts/inventory.nix 声明主机清单；每个主机目录（hosts/<name>/）
+#   提供机器层配置，system/default.nix 提供系统服务层，home/default.nix
+#   提供用户层（由 modules-enables.nix 开关板裁剪）。
+# 数据流 —— theme（system/theme.nix）、username、inputs、enabled 等经
+#   specialArgs / extraSpecialArgs 注入各层模块。
+# 修改指引 —— 换用户名改 username；加主机改 hosts/inventory.nix 并建目录；
+#   增删用户软件改 home/modules-enables.nix；主题改 system/theme.nix。
 {
-  # 仓库描述，仅用于 `nix flake metadata` 等信息展示
-  description = "Levi configuration";
+  # flake 描述（仅元数据，不影响求值）
+  description = "NixOS configuration (flake-parts + home-manager)";
 
-  # --------------------------------------------------------------------------
-  # nixConfig：把以下设置写入本机 /etc/nix/nix.conf （对所有用户生效）
-  # --------------------------------------------------------------------------
-  nixConfig = {
-    # 额外的二进制缓存源：Noctalia（Quickshell 实现的 Wayland 桌面 Shell）
-    # 的预编译产物，避免本地从头编译整个桌面环境
-    extra-substituters = ["https://noctalia.cachix.org"];
-
-    # 与上面缓存源配套的信任公钥，防止 Nix 拒绝下载被篡改的二进制
-    extra-trusted-public-keys = ["noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="];
-
-    # 全局生效的缓存源与信任公钥（会覆盖系统默认值）
-    substituters = [
-      "https://mirrors.ustc.edu.cn/nix-channels/store"
-      "https://cache.nixos.org"
-    ];
-    trusted-public-keys = [
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-    ];
-  };
-
-  # --------------------------------------------------------------------------
-  # inputs：所有外部依赖
-  # --------------------------------------------------------------------------
+  # 输入依赖：全部由 flake.lock 锁定，普通构建不会更新锁。
   inputs = {
-    # 系统基础包集，锁定到稳定分支；绝大多数包都来自这里
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-26.05";
+    # 系统主包集：nixos-unstable 通道
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    # 不稳定包集：用于需要最新版本软件的场景，通过 pkgs-unstable 引用
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    # AI 编码工具 OpenCode（dev 分支），经 extraSpecialArgs.inputs 传入 home 层
+    opencode = {
+      url = "github:anomalyco/opencode/dev";
+    };
 
-    # age 加密密钥管理工具：用于解密 ./secrets/*.age 加密文件
-    # 【已禁用】当前不需要加解密流程，本仓库中所有 agenix 相关引用均已注释：
-    #   - 此处的 input 声明
-    #   - outputs 形参中的 agenix
-    #   - 下方的 agenix.nixosModules.default / agenix.homeManagerModules.default
-    #   - agenix 命令行工具的安装
-    #   - configuration.nix 中的 age.identityPaths / age.secrets
-    #   - modules/systemd.nix（env-loader 服务，依赖 age.secrets）
-    # 恢复时请把上述几处一并取消注释，否则会因缺少模块或缺少 input 而构建失败。
-    # agenix.url = "github:ryantm/agenix";
+    # flake-parts：模块化的 flake 输出组织器；
+    # nixpkgs-lib 跟随主 nixpkgs，避免引入第二份 lib
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
 
-    # Noctalia 桌面 Shell 的缓存源（Quickshell + Zig 构建，故需自建缓存）
-    noctalia.url = "github:noctalia-dev/noctalia/cachix";
+    # 用户层管理框架；follows 主 nixpkgs，保证两层用同一份包源
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    # Zen Browser（Firefox 的开源替代）：未收录进 nixpkgs，由该 flake 提供
-    # 暴露 packages.<system>.{beta,twilight,twilight-official}，其中 default = beta
+    # Zen browser (removed from nixpkgs; community-maintained flake:
+    # https://github.com/0xc000022070/zen-browser-flake). Follows our nixpkgs
+    # and home-manager; the flake assumes nixpkgs-unstable, which we are on.
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
-      # 复用下面的 nixpkgs，避免同一软件出现两份 store 路径
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
     };
 
-    # CookNixvim 配置完整版：一站式 Neovim 配置包，home.packages 直接取其默认包
-    CookNixvim = {
-      url = "github:Youthdreamer/CookNixvim";
-      # 复用上面的 nixpkgs，避免重复拉取
-      inputs.nixpkgs.follows = "nixpkgs";
+    # GitHub acceleration hosts, pinned by flake.lock; refresh manually via
+    # `nix flake update github-hosts` (system.autoUpgrade is disabled).
+    github-hosts = {
+      url = "github:521xueweihan/GitHub520";
+      flake = false;
     };
 
-    # BiliBili 直播弹幕终端客户端（TUI），同样以包形式提供
-    bili-danmaku-tui.url = "github:Youthdreamer/bili-danmaku-tui";
-
-    # Catppuccin 配色方案（提供 NixOS 模块与 home-manager 模块两种形态）
-    catppuccin.url = "github:catppuccin/nix/release-26.05";
-
-    # home-manager：以模块方式嵌入 NixOS，实现声明式的用户级配置
-    home-manager = {
-      url = "github:nix-community/home-manager/release-26.05";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  # --------------------------------------------------------------------------
-  # outputs：对外暴露的 flake 输出
-  #   形参中逐个列出 inputs 只是为了在下面方便引用（等价于 inputs.x）
-  # --------------------------------------------------------------------------
-  outputs = {
-    self,
-    nixpkgs,
-    nixpkgs-unstable,
-    home-manager,
-    CookNixvim,
-    bili-danmaku-tui,
-    # agenix, # 【已禁用】见 inputs 中 agenix 处的说明
-    catppuccin,
-    noctalia,
-    ...
-  } @ inputs: let
-    # 当前配置的目标平台（Intel 64 位 Linux）
-    system = "x86_64-linux";
+  outputs =
+    inputs@{ flake-parts, nixpkgs, ... }:
+    let
+      lib = nixpkgs.lib;
+      # 全仓库唯一的目标平台（当前仅 x86_64 笔记本）
+      system = "x86_64-linux";
+      # 全局用户名：主机层账号与 home 层配置共用
+      username = "koru";
+      # 全局主题单一数据源（纯数据），经 specialArgs 注入 system 与 home 两层
+      theme = import ./system/theme.nix;
 
-    # 单独实例化一份不稳定包集，并允许非自由软件（proprietary）
-    pkgs-unstable = import nixpkgs-unstable {
-      inherit system;
-      config.allowUnfree = true;
-    };
-  in {
-    nixosConfigurations = {
-      # flake 上的系统配置名；`--flake .#levi` 中的 levi 即来源于此
-      # 与 configuration.nix 中的 networking.hostName 保持一致
-      levi = nixpkgs.lib.nixosSystem {
-        inherit system;
+      # 主机清单（名字 → { system; ... }），驱动下方所有输出按主机生成
+      hosts = import ./hosts/inventory.nix;
 
-        # 额外注入到每个 NixOS 模块的参数：
-        #   inputs          —— 全部 flake 输入，供 modules/*.nix 引用
-        #   pkgs-unstable   —— 不稳定包集实例，供个别模块使用
-        specialArgs = {
-          inherit inputs pkgs-unstable;
+      # pkgs per target system: standalone home profiles and NixOS configs may
+      # target different architectures once non-x86_64 hosts are added.
+      # allowUnfree is repeated from system/nix-daemon.nix on purpose: standalone home
+      # profiles use this separate pkgs instance (the embedded one reuses the
+      # system set via useGlobalPkgs), so it must be set in both places.
+      mkPkgs =
+        system:
+        import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
         };
 
-        modules = [
-          # 本仓库的系统级配置（手工维护）
-          ./configuration.nix
+      # 用户层唯一根模块（home/default.nix 内部再做发现与校验）
+      homeModules = [ ./home/default.nix ];
 
-          # ---- 第三方 NixOS 模块 ----
-          # agenix.nixosModules.default # 密钥解密能力【已禁用】
-          catppuccin.nixosModules.catppuccin # 主题
-          home-manager.nixosModules.home-manager # 声明式用户配置
-
-          # 把 agenix 命令行工具装进系统环境【已禁用】
-          # {
-          #   environment.systemPackages = [agenix.packages.${system}.default];
-          # }
-
-          # ---- home-manager 配置块 ----
-          {
-            # 直接使用系统 pkgs，避免为用户再构建一套包集
-            home-manager.useGlobalPkgs = true;
-            # 用户包同时安装到系统 PATH
-            home-manager.useUserPackages = true;
-            # 把同样的特殊参数透传给 home-manager 的各个模块
-            home-manager.extraSpecialArgs = {inherit inputs pkgs-unstable;};
-
-            # 声明用户 youth（与 configuration.nix 中的 users.users.youth 对应）
-            home-manager.users.youth = {
-              imports = [
-                catppuccin.homeModules.catppuccin # 主题（用户级）
-                # agenix.homeManagerModules.default # 密钥解密（用户级）【已禁用】
-                noctalia.homeModules.default # Noctalia 桌面 Shell
-                ./home/youth # 本仓库的用户级配置根目录
-              ];
-              # 直接安装的第三方包（不走 home.programs 声明）
-              home.packages = [
-                CookNixvim.packages.${system}.default
-                bili-danmaku-tui.packages.${system}.default
-              ];
-            };
-          }
-        ];
+      # The user-layer switchboard (home/modules-enables.nix) and its forced variant:
+      # `all` turns every module on so nothing can rot unnoticed.
+      homeEnabled = import ./home/modules-enables.nix;
+      enabledAll = homeEnabled // {
+        enable = builtins.mapAttrs (_: _: true) homeEnabled.enable;
       };
+
+      # extraSpecialArgs shared by the embedded and standalone home profiles.
+      mkHomeSpecialArgs = enabled: {
+        inherit
+          inputs
+          theme
+          username
+          enabled
+          ;
+      };
+
+      # 构造完整 NixOS 系统：主机层目录 + 系统服务层 + 内嵌 home-manager（用户层）
+      mkHost =
+        name: host:
+        nixpkgs.lib.nixosSystem {
+          system = host.system;
+          # 注入各层模块的共享参数（theme/username/inputs 与主机名）
+          specialArgs = {
+            inherit
+              inputs
+              theme
+              username
+              ;
+            hostname = name;
+          };
+          modules = [
+            # 机器层：硬件、引导、电源、账号（hosts/<name>/ 目录全部模块）
+            ./hosts/${name}
+          ]
+          # 系统服务层：桌面会话、网络、音频、Nix 等（显式清单见 system/default.nix）
+          ++ [ ./system/default.nix ]
+          ++ [
+            # 内嵌 home-manager：用户层随系统一次构建、一次切换
+            inputs.home-manager.nixosModules.home-manager
+            {
+              # 复用系统 pkgs（含 allowUnfree），用户包进系统环境
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              # 被接管的既有配置文件备份为 *.hm-bak，而不是构建失败
+              home-manager.backupFileExtension = "hm-bak";
+              # 开关板按原样传入：内嵌 profile 与独立 profile 行为一致
+              home-manager.extraSpecialArgs = mkHomeSpecialArgs homeEnabled;
+              home-manager.users.${username} = {
+                imports = homeModules;
+              };
+            }
+          ];
+        };
+
+      # 构造独立 home profile（不嵌系统）：enabled 决定开关板按原样还是全开
+      mkHome =
+        enabled: host:
+        inputs.home-manager.lib.homeManagerConfiguration {
+          pkgs = mkPkgs host.system;
+          extraSpecialArgs = mkHomeSpecialArgs enabled;
+          modules = homeModules;
+        };
+
+      # Working tree for the format/lint checks (no .git or editor junk).
+      src = lib.cleanSource ./.;
+    in
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ system ];
+
+      flake.nixosConfigurations = lib.concatMapAttrs (name: host: {
+        "${name}" = mkHost name host;
+      }) hosts;
+
+      flake.homeConfigurations =
+        lib.concatMapAttrs (name: host: {
+          "${name}" = mkHome homeEnabled host;
+        }) hosts
+        // {
+          # Evaluation-only: every home module forced on, so a module no host
+          # currently imports still fails CI the day it breaks. Built through
+          # the same mkHome as the real profiles, so the two cannot drift.
+          all = mkHome enabledAll { inherit system; };
+        };
+
+      # 按平台提供的开发辅助：格式化器、检查用 shell 与 flake checks
+      perSystem =
+        { pkgs, ... }:
+        {
+          # nix fmt 使用的格式化器
+          formatter = pkgs.nixfmt;
+
+          # nix develop 进入的静态检查环境（CI 也用它跑 shellcheck 与测试）
+          devShells.default = pkgs.mkShellNoCC {
+            packages = with pkgs; [
+              deadnix
+              jq
+              nixfmt
+              ripgrep
+              shellcheck
+              statix
+            ];
+          };
+
+          # nix flake check 跑的全部仓库级检查（CI 的静态检查部分）
+          checks = {
+            # 代理生命周期 VM 集成测试（真实 sudo + TUN）
+            proxy-lifecycle = import ./tests/proxyctl/vm.nix { inherit pkgs; };
+            formatting =
+              pkgs.runCommand "check-formatting"
+                {
+                  nativeBuildInputs = [ pkgs.nixfmt ];
+                }
+                ''
+                  nixfmt --check $(find ${src} -name '*.nix' -type f)
+                  touch $out
+                '';
+
+            lint =
+              pkgs.runCommand "check-lint"
+                {
+                  nativeBuildInputs = [ pkgs.statix ];
+                }
+                ''
+                  statix check --config ${src}/statix.toml ${src}
+                  touch $out
+                '';
+
+            dead-code =
+              pkgs.runCommand "check-dead-code"
+                {
+                  nativeBuildInputs = [ pkgs.deadnix ];
+                }
+                ''
+                  deadnix --fail ${src}
+                  touch $out
+                '';
+          };
+        };
     };
-  };
 }
