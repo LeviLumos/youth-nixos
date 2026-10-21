@@ -119,7 +119,7 @@
     home = "/home/youth";
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true; # 忽略 NixOS 对「shell 必须在 store 中」的安全检查
-    # hashedPassword = "$6$d89dDb.7HKl8dx2J$NP00uF4ukMaVYoWzInQxoeokT7927qybXJGzrGwe7WYd7aRNMrNVfLbgnotRDPysU0lqTrZ1L0uTu7EjXsYwg/"; # SHA-512 密码哈希（明文不可恢复，修改需用 mkpasswd 生成）
+    hashedPassword = "$6$auEB/w77BBQy1tzU$nQT8XMD0///8UG9KNbVEyYGdVlGx86Wo75wxHKsDHoiaQZ6nvsjo2hQ72wXww93OhcPUTZOApSAHBQ8sJaNnl/"; # SHA-512 密码哈希（明文不可恢复，修改需用 mkpasswd 生成）
     extraGroups = [
       "wheel" # 系统管理员（配合下方免密 sudo）
       "networkmanager" # NetworkManager / 无线网络管理
