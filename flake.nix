@@ -35,10 +35,11 @@
 
     # 全局生效的缓存源与信任公钥（会覆盖系统默认值）
     substituters = [
+      "https://mirrors.ustc.edu.cn/nix-channels/store"
       "https://cache.nixos.org"
     ];
     trusted-public-keys = [
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURrbJ16ZPMQFGspcDShjY="
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
   };
 
