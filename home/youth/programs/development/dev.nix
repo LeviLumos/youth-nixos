@@ -17,8 +17,8 @@
     typst # Typst：Rust 编写的现代标记排版系统，可编译 PDF
 
     # ---- JavaScript / TypeScript 生态 ----
-    nodejs_24 # Node.js 24 运行时（含 npm）
-    pnpm_10 # pnpm 10：快速、节省磁盘的包管理器
+    # nodejs_24 # Node.js 24 运行时（含 npm）
+    # pnpm_10 # pnpm 10：快速、节省磁盘的包管理器
 
     # ---- Rust 生态 ----
     # 说明：此处安装 nixpkgs 提供的 Rust 工具链（非 rustup 管理器），
@@ -31,7 +31,7 @@
     # go # Go 语言工具链
 
     # ---- Python ----
-    python314 # Python 3.14 解释器
+    # python314 # Python 3.14 解释器
     uv # uv：极速的 Python 包与项目管理器（可替代 pip/venv/poetry）
 
     # ---- C / C++ 编译与调试 ----

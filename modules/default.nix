@@ -16,6 +16,7 @@
 {
   imports = [
     ./clash.nix # 代理客户端与系统级代理环境变量
+    ./nix-ld.nix # 运行通用 Linux 预编译二进制（mise 装的 node、uvx / npm 原生模块等）
     ./virtualization.nix # 容器与虚拟机（Docker / libvirt / virt-manager）
     ./documentation.nix # 系统手册与文档（man、nixos-help 等）
     # ./systemd.nix # 自定义 systemd 用户服务（解密密钥注入图形会话）
