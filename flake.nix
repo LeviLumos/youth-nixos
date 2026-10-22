@@ -43,6 +43,7 @@
     , home-manager
     , github-hosts
     , zen-browser
+    , msime
     , ...
     } @ inputs:
     let
