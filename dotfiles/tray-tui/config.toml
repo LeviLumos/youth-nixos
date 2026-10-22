@@ -1,0 +1,59 @@
+# =============================================================================
+#  tray-tui 配置（终端里的系统托盘）
+# -----------------------------------------------------------------------------
+#  部署：home-manager home.file → ~/.config/tray-tui/config.toml
+#  变量来自 vars.nix：@accent@ @foreground@
+#  启动：super+shift+t（在 kitty 里打开），或直接在终端执行 tray-tui
+#  说明：tray-tui 只负责「托盘图标」，不提供状态栏/壁纸/锁屏/通知
+#        状态栏=waybar、壁纸=swaybg、锁屏=swaylock、通知=mako
+#  完整选项见：https://github.com/Levizor/tray-tui/blob/main/config_example.toml
+# =============================================================================
+
+# 是否按标题排序托盘项
+sorting = false
+# 布局的最大列数
+columns = 3
+# 托盘项的最小高度
+min_height = 4
+# 是否显示滚动条
+scrollbar = true
+# 是否启用鼠标
+mouse = false
+
+[key_map]
+# 在托盘项之间移动焦点
+left = "focus_left"
+h = "focus_left"
+right = "focus_right"
+l = "focus_right"
+up = "focus_up"
+j = "focus_up"
+down = "focus_down"
+k = "focus_down"
+# 在菜单树里移动
+shift-down = "menu_down"
+shift-up = "menu_up"
+# 退出
+q = "quit"
+ctrl-c = "quit"
+esc = "quit"
+# 激活当前项
+enter = "activate"
+
+[colors]
+bg = "reset"
+bg_focused = "reset"
+fg = "@foreground@"
+fg_focused = "@foreground@"
+bg_highlighted = "@accent@"
+fg_highlighted = "#1A1A17"
+border_fg = "@foreground@"
+border_fg_focused = "@accent@"
+border_bg = "reset"
+border_bg_focused = "reset"
+
+[symbols]
+highlight_symbol = ""
+node_open_symbol = " ▶ "
+node_closed_symbol = " ⏷ "
+node_no_children_symbol = " "

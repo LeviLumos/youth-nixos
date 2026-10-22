@@ -1,0 +1,163 @@
+// =============================================================================
+//  niri 配置（KDL）
+// -----------------------------------------------------------------------------
+//  部署方式：home-manager 的 home.file → ~/.config/niri/config.kdl
+//            （modules/home/niri.nix）
+//  变量来源：vars.nix 的 niri.* / theme.* / desktop.*，占位符形如 @gaps@ 构建期替换
+//  官方文档：https://niri-wm.github.io/niri/Configuration:-Introduction
+// =============================================================================
+
+// ---- 输入设备 ----------------------------------------------------------------
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+        // 开机开启小键盘
+        numlock
+    }
+
+    touchpad {
+        tap
+        natural-scroll
+    }
+
+    mouse {
+    }
+
+    trackpoint {
+    }
+}
+
+// ---- 输出（显示器）------------------------------------------------------------
+//  需要固定分辨率/缩放时，先 `niri msg outputs` 看输出名，再取消下面注释：
+//  output "eDP-1" {
+//      mode "1920x1080@120"
+//      scale 2
+//      transform "normal"
+//      position x=0 y=0
+//  }
+
+// ---- 布局 --------------------------------------------------------------------
+layout {
+    // 需求：间隙 3px
+    gaps @gaps@
+
+    center-focused-column "never"
+
+    // 新窗口默认占屏幕的一半
+    default-column-width { proportion 0.5; }
+
+    // 需求只要求「活动窗口有淡鹅黄色边框」，因此关闭 focus-ring，
+    // 统一由下面的 border 表达（活动=淡鹅黄，非活动=灰）。
+    // 若你更喜欢「只有聚焦窗口才出现边框」，把 focus-ring 的 off 注释掉、
+    // 并把 border 设成 off 即可。
+    focus-ring {
+        off
+    }
+
+    border {
+        width @borderWidth@
+        // 需求：活动的窗口用淡鹅黄色包围
+        active-color "@activeBorder@"
+        inactive-color "@inactiveBorder@"
+        urgent-color "@urgentBorder@"
+    }
+}
+
+// ---- 需求：无圆角 --------------------------------------------------------------
+//  1) 尽量让应用不要画自己的客户端装饰（CSD 圆角）
+prefer-no-csd
+
+//  2) 由 niri 强制几何圆角为 0（所有窗口）
+window-rule {
+    geometry-corner-radius @cornerRadius@
+    clip-to-geometry true
+}
+
+// ---- 其他 ---------------------------------------------------------------------
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+// 启动时显示「重要快捷键」浮层
+hotkey-overlay {
+}
+
+// 动画（默认开启）
+animations {
+}
+
+// ---- 开机自启动 ----------------------------------------------------------------
+//  状态栏
+spawn-at-startup "@bar@"
+//  壁纸（用 sh 执行，~ 会被展开；文件不存在时 swaybg 会退出，不影响其它功能）
+spawn-sh-at-startup "@wallpaperTool@ -i @wallpaper@ --mode fill"
+//  如果 mako 通知没起来，取消下面这行注释（与 home-manager 的 mako 服务二选一）
+//  spawn-at-startup "mako"
+
+// ---- 键位绑定 ------------------------------------------------------------------
+//  Mod = Super（TTY 下）；需求里的 super 即 Mod
+binds {
+    // (1) super + space → 应用启动器
+    Mod+Space repeat=false hotkey-overlay-title="应用启动器: @launcher@" {
+        spawn "@launcher@";
+    }
+
+    // (2) super + h/j/k/l → 焦点 左/下/上/右
+    Mod+H { focus-column-left; }
+    Mod+J { focus-window-down; }
+    Mod+K { focus-window-up; }
+    Mod+L { focus-column-right; }
+
+    // (3) super + t → 打开终端 kitty
+    Mod+T repeat=false hotkey-overlay-title="终端: @terminal@" {
+        spawn "@terminal@";
+    }
+
+    // (4) super + q → 关闭当前窗口
+    Mod+Q repeat=false { close-window; }
+
+    // (5) super + u/i → workspace up/down
+    Mod+U { focus-workspace-up; }
+    Mod+I { focus-workspace-down; }
+
+    // (6) super + [ / ] → 窗口移到 左/右
+    Mod+BracketLeft  { move-column-left; }
+    Mod+BracketRight { move-column-right; }
+
+    // (7) super + 9/0 → 窗口在列内移到 上一个/下一个（已确认的语义）
+    Mod+9 { move-window-up; }
+    Mod+0 { move-window-down; }
+
+    // ---- 桌面配套：锁屏 / 托盘 ------------------------------------------------
+    //  锁屏（swaylock，PAM 见 modules/nixos/desktop.nix）
+    Super+Alt+L hotkey-overlay-title="锁屏: @locker@" { spawn "@locker@"; }
+    //  系统托盘（tray-tui，在终端里）
+    Mod+Shift+T hotkey-overlay-title="系统托盘: @tray@" {
+        spawn-sh "@terminal@ --title @tray@ @tray@";
+    }
+    //  电源：挂起 / 休眠（休眠需要 swap ≥ 内存，见 doc/系统需求.md）
+    Super+Alt+S hotkey-overlay-title="挂起 (suspend)" { spawn-sh "systemctl suspend"; }
+    Super+Alt+H hotkey-overlay-title="休眠 (hibernate)" { spawn-sh "systemctl hibernate"; }
+    Super+Alt+W hotkey-overlay-title="先挂起，2h 后转休眠" { spawn-sh "systemctl suspend-then-hibernate"; }
+
+    // -------------------------------------------------------------------------
+    // 保底/常用键位（不属于需求，但强烈建议保留，否则可能“出不去”）
+    // -------------------------------------------------------------------------
+    // 显示重要快捷键
+    Mod+Shift+Slash { show-hotkey-overlay; }
+    // 退出 niri（带确认弹窗）
+    Mod+Shift+E { quit; }
+    Ctrl+Alt+Delete { quit; }
+    // 截屏
+    Print { screenshot; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print { screenshot-window; }
+    // 最大化 / 全屏 / 浮动
+    Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+    Mod+V { toggle-window-floating; }
+    // 总览
+    Mod+O repeat=false { toggle-overview; }
+    // 快捷键被应用拦截时的逃生开关
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+}

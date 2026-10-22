@@ -1,19 +1,5 @@
-# .gitignore —— 本仓库的忽略规则：Nix 构建产物、home-manager 备份、
-# 编辑器临时文件与机密文件（真实 secrets.env 在仓库外，防止误拷入提交）。
-# Nix build results
-/result
-/result-*
-
-# home-manager backups of pre-existing files
-*.hm-bak
-
-# Editor
+result
+result-*
+.direnv
 *.swp
-*.swo
 *~
-
-# Secrets (Vault/env files). The live file is ~/.config/zsh/secrets.env, outside
-# this repo; this pattern prevents an accidental copy from being committed.
-secrets.env
-*.secret
-*.secrets
