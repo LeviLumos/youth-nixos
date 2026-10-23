@@ -10,6 +10,7 @@
     # ./input-method.nix    # 输入法（默认关闭；启用步骤见 vars.inputMethod 与 doc/系统需求.md）
     ./bluetooth.nix       # 蓝牙（由 vars.hardware.bluetooth 开关）
     ./printing.nix        # 打印 CUPS + 扫描 SANE（由 vars.hardware.* 开关）
+    ./containers.nix      # 容器 podman（rootless + docker 兼容，vars.virtualisation.podman）
     ./power.nix           # 电源管理 / 合盖 / 挂起 / 休眠（由 vars.power.* 开关）
     ./packages.nix        # 全局软件包：wget / curl / git / vim + sshd
     ./user.nix            # 用户 youth 的创建

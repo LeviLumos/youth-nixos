@@ -84,6 +84,16 @@ in
     scanning = true;                      # 扫描（SANE）
   };
 
+  # ---- 容器（podman）----------------------------------------------------------
+  #  rootless（不用 sudo）+ 兼容 docker 命令；btop 等监控工具在用户级包里
+  virtualisation = {
+    podman = {
+      enable = true;                      # false = 完全不装容器运行时
+      dockerCompat = true;                # 提供 docker 命令（指向 podman 的兼容层）
+      autoPrune = true;                   # 每周清理悬空镜像 / 停止的容器
+    };
+  };
+
   # ---- 电源 / 休眠 -----------------------------------------------------------
   power = {
     enable = true;                        # power-profiles-daemon + upower + 节能

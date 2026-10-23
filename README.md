@@ -53,6 +53,8 @@ just gc       # 清理 30 天前旧世代
 | 窗口管理器 | niri（无圆角 / 3px 间隙 / 活动窗口淡鹅黄边框） |
 | 登录管理 | greetd + tuigreet（开机免密直进 niri，`vars.niri.autoLogin`） |
 | 系统信息 | fastfetch（niri 开机自动在终端里显示一次） |
+| 系统监控 | btop（终端里敲 `btop`） |
+| 容器 | podman（rootless，`dockerCompat` 提供 docker 命令；开关 `vars.virtualisation.podman`） |
 | 壁纸 | swaybg |
 | 锁屏 | swaylock（`super+alt+l`） |
 | 通知 | mako |
