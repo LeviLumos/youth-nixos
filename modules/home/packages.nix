@@ -27,8 +27,9 @@ in
 
     # zen-browser：nixpkgs 26.05 未内置，使用社区 flake（已确认保留该 input）
     # 若你的 nixpkgs 已内置，把这一行换成 pkgs.zen-browser 并删除 flake.nix 里的 zen-browser 输入
-    (inputs.zen-browser.packages.${pkgs.system}.default
-      or inputs.zen-browser.packages.${pkgs.system}.zen)
+    # ⚠️ 用 stdenv.hostPlatform.system，不要用 pkgs.system（后者在 26.05 已弃用、会报警告）
+    (inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+      or inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen)
 
     # ---- 6~8. Python 环境管理 / 文件管理 / Git TUI ---------------------------
     pkgs.uv
