@@ -63,7 +63,7 @@ in
     ] ++ (with pkgs; [
       noto-fonts
       noto-fonts-cjk-sans            # 中文（界面/文档）
-      noto-fonts-emoji               # emoji
+      noto-fonts-color-emoji         # emoji（26.05 起由 noto-fonts-emoji 改名而来）
     ]);
 
     fontconfig.defaultFonts = {
