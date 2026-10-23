@@ -43,7 +43,7 @@ just gc       # 清理 30 天前旧世代
 | `hosts/<hostname>/` | 主机配置 + 引导；`hardware-configuration.nix` 不入库，自动探测 |
 | `modules/nixos/` | 系统级模块（含显卡 graphics；输入法 input-method 默认关闭） |
 | `modules/home/` | home-manager 用户级模块（全部用 `home.file` 托管 dotfile） |
-| `dotfiles/` | 原生 dotfile：niri / kitty / waybar / tray-tui / zsh |
+| `dotfiles/` | 原生 dotfile：niri / kitty / tray-tui / zsh |
 | `doc/` | 需求 + 使用手册 + zsh/kitty 详解 |
 
 ## 已包含的桌面能力
@@ -51,15 +51,14 @@ just gc       # 清理 30 天前旧世代
 | 功能 | 软件 |
 | --- | --- |
 | 窗口管理器 | niri（无圆角 / 3px 间隙 / 活动窗口淡鹅黄边框） |
-| 状态栏 | waybar |
 | 壁纸 | swaybg |
 | 锁屏 | swaylock（`super+alt+l`） |
 | 通知 | mako |
 | 托盘 | tray-tui（`super+shift+t`，终端内） |
-| 输入法 | 默认不安装；需要时按 `doc/系统需求.md` 三步开启（水杉输入法 MSIME + fcitx5） |
+| 输入法 | 水杉输入法 MSIME（fcitx5），开关 `vars.inputMethod.enable` |
 
-> 输入法默认关闭：水杉输入法需从源码编译 Rust，在 live 安装环境（`/nix` 在内存盘）容易失败，
-> 建议装好系统后再打开。
+> 状态栏（waybar）已移除；需要可自行加回，步骤见 `doc/系统需求.md` 第九节。
+> 输入法首次使用需执行一次 `msime-linux-setup --download`（下载约 189MB 词库）。
 
 ## 文档
 

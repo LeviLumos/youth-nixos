@@ -12,7 +12,7 @@
     ./niri.nix           # home.file → ~/.config/niri/config.kdl
     ./kitty.nix          # home.file → ~/.config/kitty/kitty.conf
     ./zsh.nix            # home.file → ~/.zshrc
-    ./desktop.nix        # 通知(mako) / 状态栏(waybar) / 托盘(tray-tui)
+    ./desktop.nix        # 通知(mako) / 空闲(swayidle) / 托盘(tray-tui)
   ];
 
   home = {

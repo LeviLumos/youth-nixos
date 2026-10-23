@@ -17,7 +17,6 @@
       urgentBorder = vars.theme.urgentBorder;
       terminal = vars.niri.terminal;
       launcher = vars.niri.launcher;
-      bar = vars.desktop.bar;
       wallpaperTool = vars.desktop.wallpaperTool;
       wallpaper = vars.desktop.wallpaper;
       locker = vars.desktop.locker;

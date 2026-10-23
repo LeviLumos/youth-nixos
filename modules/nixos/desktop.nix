@@ -38,7 +38,7 @@ in
   systemd.user.services.niri.enableDefaultPath = false;
 
   # ---- 音频（PipeWire）------------------------------------------------------
-  #  pavucontrol、waybar 音量模块、waybar 的音量点击都依赖它；关掉就没有声音
+  #  pavucontrol 等混音器依赖它；关掉就没有声音
   services.pipewire = lib.mkIf vars.hardware.audio {
     enable = true;
     alsa.enable = true;                  # ALSA 应用 → PipeWire

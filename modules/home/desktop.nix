@@ -1,7 +1,7 @@
 # =============================================================================
-#  桌面配套：状态栏 / 壁纸 / 锁屏 / 通知 / 托盘 / 空闲行为
+#  桌面配套：壁纸 / 锁屏 / 通知 / 托盘 / 空闲行为
 # -----------------------------------------------------------------------------
-#  状态栏 waybar   —— niri 启动时拉起（dotfiles/niri/config.kdl 的 spawn-at-startup）
+#  状态栏 —— 已移除（原为 waybar；如需状态栏，见 doc/系统需求.md「状态栏」一节）
 #  壁纸   swaybg   —— niri 启动时拉起（spawn-sh-at-startup）
 #  锁屏   swaylock —— super+alt+l；空闲自动锁屏由下面的 swayidle 负责
 #  通知   mako     —— 本模块的 systemd 用户服务
@@ -80,18 +80,6 @@ in
       "before-sleep" = lockCmd;
     };
   };
-
-  # ---- 状态栏 ---------------------------------------------------------------
-  #  config.jsonc 是静态文件，直接软链；style.css 需要注入主题变量
-  home.file.".config/waybar/config.jsonc".source = ../../dotfiles/waybar/config.jsonc;
-  home.file.".config/waybar/style.css".source =
-    pkgs.replaceVars ../../dotfiles/waybar/style.css {
-      fontFamily = vars.fonts.mono.family;
-      fontSize = toString vars.fonts.mono.size;
-      background = vars.theme.background;
-      foreground = vars.theme.foreground;
-      accent = vars.theme.accent;
-    };
 
   # ---- 终端托盘 -------------------------------------------------------------
   home.file.".config/tray-tui/config.toml".source =

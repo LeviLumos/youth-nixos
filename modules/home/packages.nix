@@ -5,7 +5,7 @@
 #    1. dev_env：python314 / nodejs24（npm 由 nodejs 自带）/ just
 #    2. vscodium      3. zen-browser   4. google-browser(chrome)
 #    5. obsidian      6. uv            7. yazi          8. lazygit
-#  桌面配套：状态栏 waybar / 壁纸 swaybg / 锁屏 swaylock / 托盘 tray-tui
+#  桌面配套：壁纸 swaybg / 锁屏 swaylock / 空闲 swayidle / 托盘 tray-tui
 # =============================================================================
 { inputs, pkgs, vars, ... }:
 
@@ -40,12 +40,11 @@ in
     pkgs.fuzzel                        # 应用启动器
     pkgs.kitty                         # 终端（也由需求指定）
 
-    # ---- 桌面配套：状态栏 / 壁纸 / 锁屏 / 托盘 / 音频 --------------------------
-    pkgs.waybar                        # 状态栏（vars.desktop.bar）
+    # ---- 桌面配套：壁纸 / 锁屏 / 空闲 / 托盘 / 音频 --------------------------------
     pkgs.swaybg                        # 壁纸（vars.desktop.wallpaperTool）
     pkgs.swaylock                      # 锁屏（vars.desktop.locker）
     pkgs.swayidle                      # 空闲自动锁屏 / 挂起 / 休眠
     pkgs.tray-tui                      # 终端里的系统托盘（vars.desktop.tray）
-    pkgs.pavucontrol                   # 音量/混音器图形界面（waybar 音量点击打开）
+    pkgs.pavucontrol                   # 音量/混音器图形界面（启动器里搜 PulseAudio Volume Control）
   ];
 }

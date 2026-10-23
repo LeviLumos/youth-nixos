@@ -5,7 +5,7 @@
 #  变量来自 vars.nix：@accent@ @foreground@
 #  启动：super+shift+t（在 kitty 里打开），或直接在终端执行 tray-tui
 #  说明：tray-tui 只负责「托盘图标」，不提供状态栏/壁纸/锁屏/通知
-#        状态栏=waybar、壁纸=swaybg、锁屏=swaylock、通知=mako
+#        壁纸=swaybg、锁屏=swaylock、通知=mako（状态栏已移除）
 #  完整选项见：https://github.com/Levizor/tray-tui/blob/main/config_example.toml
 # =============================================================================
 

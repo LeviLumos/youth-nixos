@@ -20,7 +20,7 @@
   powerManagement.cpuFreqGovernor =
     lib.mkIf (vars.power.cpuFreqGovernor != null) vars.power.cpuFreqGovernor;
 
-  # 省电/均衡/性能档位切换（waybar/系统托盘可调用；命令行：powerprofilesctl set balanced）
+  # 省电/均衡/性能档位切换（命令行：powerprofilesctl set balanced）
   services.power-profiles-daemon.enable = vars.power.enable;
 
   # 电池、外设电量等状态（UPower DBus）

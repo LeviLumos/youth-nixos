@@ -97,7 +97,7 @@ in
     activeBorder = "#F2E3A8";             # 淡鹅黄：活动窗口边框（niri border.active-color）
     inactiveBorder = "#3C3C3C";           # 非活动窗口边框
     urgentBorder = "#C97B5A";             # 需要注意的窗口
-    accent = "#F2E3A8";                   # 主题强调色（waybar/mako/tray-tui/kitty 共用）
+    accent = "#F2E3A8";                   # 主题强调色（mako/tray-tui/kitty 共用）
     background = "#1A1A17";
     foreground = "#E8E6D9";
     cursor = "#F2E3A8";
@@ -105,7 +105,6 @@ in
 
   # ---- 桌面组件（状态栏 / 壁纸 / 锁屏 / 通知 / 托盘）---------------------------
   desktop = {
-    bar = "waybar";                                 # 状态栏
     wallpaperTool = "swaybg";                       # 设置壁纸的工具
     wallpaper = "~/Pictures/wallpaper.jpg";         # 壁纸路径（会被 sh 展开 ~）
     locker = "swaylock";                            # 锁屏（super+alt+l）
@@ -116,14 +115,11 @@ in
     screenOffAfter = 600;                           # 10 分钟无操作 → 关闭显示器
   };
 
-  # ---- 输入法（默认关闭）------------------------------------------------------
-  #  当前【不安装任何输入法】。
-  #  要用水杉输入法（MSIME，https://msime.app/）需三步：
-  #    1. flake.nix 里加回 msime input（文件里有注释好的代码块）
-  #    2. modules/nixos/default.nix 里取消 ./input-method.nix 的注释
-  #    3. 把下面的 enable 改成 true
+  # ---- 输入法 ----------------------------------------------------------------
+  #  水杉输入法（MSIME）：https://msime.app/  —— Linux 版提供 fcitx5 插件
+  #  ⚠️ 首次使用必做一次：msime-linux-setup --download（约 189MB 词库）
   inputMethod = {
-    enable = false;
+    enable = true;                        # false = 不装任何输入法
     framework = "fcitx5";                 # 官方 NixOS 方案只接了 fcitx5
   };
 
@@ -143,7 +139,7 @@ in
       package = "maple-mono";             # pkgs.maple-mono（nixpkgs 内置 Maple Mono）
       variant = "Normal-NF-CN";           # 可选：Normal-NF-CN / Normal-CN / NF-CN / CN ...
       family = "MapleMonoNormal NF CN";   # kitty/fontconfig 用的字体族名（见 doc/kitty.md 校验方法）
-      size = 13.0;                        # kitty / waybar / mako 字号
+      size = 13.0;                        # kitty / mako 字号
     };
   };
 
