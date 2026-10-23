@@ -7,7 +7,8 @@
     hostName = vars.hostname;
 
     # 桌面环境需要 NetworkManager（nmtui / nmcli / 托盘）
-    networkManager.enable = true;
+    # 注意：选项名全小写 —— networkmanager（不是 networkManager）
+    networkmanager.enable = true;
 
     # ---- GitHub520 hosts：国内加速 github 访问 ----
     # 来源是 flake 里的 github-hosts 输入（flake = false，即纯源码目录）
