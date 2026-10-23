@@ -56,6 +56,14 @@ in
     options = "caps:super";
   };
 
+  # ---- 键盘重映射（keyd：evdev 层，XKB 做不到的事交给它）------------------------
+  keyboard = {
+    # 按住 Alt + h/j/k/l → 方向键 左/下/上/右（文本光标移动）
+    #  轻点 Alt 仍然是 Alt（菜单、应用里的 Alt 组合照旧）
+    altHjklArrows = true;                 # false = 不启用 keyd
+    altHjklArrowsKey = "leftalt";         # 触发键："leftalt"（左 Alt）/ "rightalt"（右 Alt）
+  };
+
   # ---- 引导 -----------------------------------------------------------------
   boot = {
     loader = "uefi";                      # "uefi" = systemd-boot（UEFI） | "grub"（BIOS/MBR）

@@ -2,6 +2,7 @@
 { ... }:
 {
   imports = [
+    ./keyboard.nix        # 键盘重映射 keyd：Alt+h/j/k/l → 方向键（vars.keyboard.*）
     ./system.nix          # 版本 / 区域 / nix 设置 / 中科大源 / 允许 unfree
     ./network.nix         # 主机名 / NetworkManager / GitHub520 hosts
     ./graphics.nix        # 显卡（AMD 核显，由 vars.graphics.gpu 选择）

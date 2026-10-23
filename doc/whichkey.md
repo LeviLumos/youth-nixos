@@ -280,8 +280,51 @@ xkb = {
 
 改完 `just switch`；niri 会热重载，XWayland 应用重开即可。
 
-> 想要「轻点=Esc、长按=Mod」这种高级玩法，需要在 niri 之外再加一层
-> （如 `interception-tools` / `keyd`），那就不是 XKB options 能做到的了，需要的话我再补。
+### Alt + h/j/k/l → 方向键（文本光标移动）
+
+这个不是 XKB 能做的（XKB 只能整键互换），由 **keyd** 在 evdev 层实现，
+`modules/nixos/keyboard.nix`，开关在 `vars.nix`：
+
+```nix
+keyboard = {
+  altHjklArrows = true;             # false = 不启用 keyd
+  altHjklArrowsKey = "leftalt";     # 触发键："leftalt" / "rightalt"
+};
+```
+
+语义：
+
+| 操作 | 结果 |
+| --- | --- |
+| 轻点 Alt | 仍然是 Alt（菜单、应用里的 Alt 组合照旧） |
+| 按住 `Alt + h` | `←` |
+| 按住 `Alt + j` | `↓` |
+| 按住 `Alt + k` | `↑` |
+| 按住 `Alt + l` | `→` |
+
+⚠️ 副作用与补救：按住 Alt 时，**未在 arrows 层定义的键会「不带 Alt」发出**，
+比如 `Alt+F4` 会变成 `F4`、`Alt+Tab` 会变成 `Tab`。想保留就在 `keyboard.nix` 的
+`arrows` 层里补一条（文件里已注释好例子）：
+
+```nix
+arrows = {
+  h = "left"; j = "down"; k = "up"; l = "right";
+  tab = "leftalt+tab";          # 保留 Alt+Tab
+  f4  = "leftalt+f4";           # 保留 Alt+F4
+};
+```
+
+调试：
+
+```bash
+keyd -m              # 实时看按键被映射成什么（Ctrl+C 退出）
+journalctl -u keyd   # 配置写错会在这里报错
+sudo systemctl restart keyd
+```
+
+> 注意层次：`keyd`（evdev）→ XKB（caps:super）→ niri 键位。
+> 所以「Alt+hjkl 变成方向键」之后，niri 里再绑 `Alt+…` 就没意义了 ——
+> 窗口焦点仍用 `super+h/j/k/l`（或 CapsLock+h/j/k/l）。
 
 ---
 
