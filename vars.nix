@@ -91,6 +91,21 @@ in
     "https://cache.nixos.org"
   ];
 
+  # ---- Nix 垃圾回收（每周自动）------------------------------------------------
+  nixGc = {
+    enable = true;                        # false = 不自动回收（只能手动 nix-collect-garbage）
+    dates = "weekly";                     # systemd 定时器：weekly / daily / "Sun 04:00" …
+    deleteOlderThan = "7d";               # 保留最近 7 天的世代（想更保守就写 "30d"）
+    persistent = true;                    # 关机错过了，下次开机补跑
+  };
+
+  # ---- Nix store 去重（每周自动硬链接相同文件）---------------------------------
+  nixOptimise = {
+    enable = true;
+    dates = "weekly";
+    persistent = true;
+  };
+
   # ---- 主题（颜色）-----------------------------------------------------------
   # 需求：活动窗口用「淡鹅黄」包围边框
   theme = {

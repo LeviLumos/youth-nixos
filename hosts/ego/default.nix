@@ -47,6 +47,9 @@ in
   #  vars.boot.loader = "grub"  → GRUB（BIOS/MBR 或想用 GRUB）
   boot.loader.systemd-boot = lib.mkIf (vars.boot.loader == "uefi") {
     enable = true;
+    # 引导项条数上限：避免 ESP（/boot）被历史启动项塞满
+    # （GC 只清 /nix/store，不会清这里）
+    configurationLimit = 8;
   };
 
   boot.loader.grub = lib.mkIf (vars.boot.loader == "grub") {

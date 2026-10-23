@@ -24,9 +24,25 @@ build:
 update:
     nix flake update
 
-# 清理 30 天前的旧世代
+# 手动回收：删掉 7 天前的旧世代（与 vars.nixGc.deleteOlderThan 保持一致）
 gc:
-    sudo nix-collect-garbage --delete-older-than 30d
+    sudo nix-collect-garbage --delete-older-than 7d
+
+# 激进回收：只保留当前世代（磁盘告急时用）
+gc-all:
+    sudo nix-collect-garbage -d
+
+# 只删空目录里的旧 profile 世代（不动 store，最温和）
+gc-old:
+    sudo nix-collect-garbage --delete-old
+
+# 查看下次自动 GC 时间 + 定时器状态
+gc-status:
+    systemctl list-timers nix-gc nix-optimise
+
+# 查看 /nix 占用与磁盘余量
+store-size:
+    du -sh /nix/store 2>/dev/null; df -h /nix
 
 # （重新）生成本机硬件配置到 hosts/<hostname>/
 hw:
