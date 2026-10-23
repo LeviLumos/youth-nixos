@@ -26,7 +26,10 @@
   # 电池、外设电量等状态（UPower DBus）
   services.upower.enable = vars.power.enable;
 
-  # ---- systemd-logind：合盖 / 电源键 / 休眠策略 -------------------------------
+  # ---- systemd-logind：合盖 / 电源键 ------------------------------------------
+  #  ⚠️ NixOS 26.05 的 services.logind.settings 只接受 Login（[Login] 段）。
+  #     Handle* 系列本来就属于 [Login]；Sleep 段的写法会报
+  #     "The option `services.logind.settings.Sleep' does not exist"。
   services.logind.settings = {
     Login = {
       HandleLidSwitch = vars.power.lidSwitch;
@@ -35,12 +38,20 @@
       HandlePowerKey = vars.power.powerKey;
       # 插电时按电源键也可以设成 "ignore"，避免误触关机
     };
-    Sleep = {
-      # 笔记本：先挂起，挂起 HibernateDelaySec 后自动转休眠，省电又不丢状态
-      AllowSuspendThenHibernate = "yes";
-      HibernateDelaySec = "2h";
-    };
   };
+
+  # ---- systemd-sleep：挂起多久后转休眠（sleep.conf，不是 logind.conf）----------
+  #  sleep.conf.d/*.conf 会被 systemd-sleep 读取；AllowSuspendThenHibernate
+  #  默认就是 yes，不用写。
+  environment.etc."systemd/sleep.conf.d/10-hibernate-delay.conf" =
+    lib.mkIf vars.power.enable {
+      text = ''
+        [Sleep]
+        # 先挂起，挂起 2 小时后自动转休眠（省电又不丢状态）
+        HibernateDelaySec=2h
+      '';
+      mode = "0644";
+    };
 
   # ---- 笔记本省电（按需打开）--------------------------------------------------
   # services.tlp = {
