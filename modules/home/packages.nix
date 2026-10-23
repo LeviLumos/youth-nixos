@@ -46,5 +46,6 @@ in
     pkgs.swayidle                      # 空闲自动锁屏 / 挂起 / 休眠
     pkgs.tray-tui                      # 终端里的系统托盘（vars.desktop.tray）
     pkgs.pavucontrol                   # 音量/混音器图形界面（启动器里搜 PulseAudio Volume Control）
+    pkgs.fastfetch                     # 系统信息（niri 开机在终端里自动显示一次；命令行直接敲 fastfetch）
   ];
 }

@@ -169,7 +169,7 @@ in
     cornerRadius = 0;                     # 无圆角（需求）
     terminal = "kitty";                   # super+t 启动的终端
     launcher = "fuzzel";                  # super+space 启动的应用启动器
-    autoLogin = false;                    # true = 通过 greetd 开机直接进 niri（免密）
+    autoLogin = true;                     # true = 开机经 greetd+tuigreet 免密直进 niri
   };
 
   # ---- 字体 ------------------------------------------------------------------
