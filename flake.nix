@@ -56,14 +56,17 @@
       # nixosConfigurations 的名字 = vars.hostname
       # 因此 `nixos-rebuild switch --flake .` 可以不带 #名字
       nixosConfigurations.${vars.hostname} = nixpkgs.lib.nixosSystem {
-        inherit system;
-
         # 传给所有 NixOS 模块的额外参数
         specialArgs = {
           inherit inputs vars github-hosts zen-browser;
         };
 
         modules = [
+          # 26.05 起推荐用 nixpkgs.hostPlatform 指定架构；
+          # 老写法（nixosSystem 的 system 参数）会触发
+          # "'system' has been renamed to/replaced by 'stdenv.hostPlatform.system'" 警告
+          { nixpkgs.hostPlatform = system; }
+
           ./hosts/${vars.hostname}/default.nix
           home-manager.nixosModules.home-manager
         ];
