@@ -10,8 +10,12 @@
 # =============================================================================
 { lib, pkgs, vars, ... }:
 let
-  # 锁屏命令：-f 必须带上，否则 swayidle 触发时会阻塞
+  # ⚠️ swayidle 的 systemd 服务把 PATH 设成了「只有 bash」，
+  #    所以下面所有命令都必须写【绝对路径】，否则会 command not found。
+  #  锁屏命令：-f 必须带上，否则 swayidle 触发时会阻塞
   lockCmd = "${lib.getExe pkgs.${vars.desktop.locker}} -f";
+  systemctl = "${pkgs.systemd}/bin/systemctl";
+  niri = lib.getExe pkgs.niri;
 
   d = vars.desktop;
   p = vars.power;
@@ -46,7 +50,10 @@ in
   #  查看状态：systemctl --user status swayidle
   services.swayidle = {
     enable = idleEnabled;
-    systemdTarget = "graphical-session.target";
+
+    # 26.05 起：systemdTarget → systemdTargets（列表）
+    systemdTargets = [ "graphical-session.target" ];
+
     timeouts =
       lib.optional (d.lockAfter > 0) {
         timeout = d.lockAfter;
@@ -54,20 +61,24 @@ in
       }
       ++ lib.optional (d.screenOffAfter > 0) {
         timeout = d.screenOffAfter;
-        command = "niri msg action power-off-monitors";
-        resumeCommand = "niri msg action power-on-monitors";
+        command = "${niri} msg action power-off-monitors";
+        resumeCommand = "${niri} msg action power-on-monitors";
       }
       ++ lib.optional (p.suspendAfter > 0) {
         timeout = p.suspendAfter;
-        command = "systemctl suspend";
+        command = "${systemctl} suspend";
       }
       ++ lib.optional (p.hibernateAfter > 0) {
         timeout = p.hibernateAfter;
-        command = "systemctl hibernate";
+        command = "${systemctl} hibernate";
       };
 
-    # 进入睡眠/休眠之前先锁屏，醒来必须输密码
-    events = [{ event = "before-sleep"; command = lockCmd; }];
+    # 26.05 起：events 由「列表」改成「以事件名为键的属性集」
+    #  可选键：before-sleep / after-resume / lock / unlock
+    #  进入睡眠/休眠之前先锁屏，醒来必须输密码
+    events = {
+      "before-sleep" = lockCmd;
+    };
   };
 
   # ---- 状态栏 ---------------------------------------------------------------
