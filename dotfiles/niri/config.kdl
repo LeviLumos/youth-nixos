@@ -104,10 +104,19 @@ binds {
     }
 
     // (2) super + h/j/k/l → 焦点 左/下/上/右
+    //     ⚠️ 这是【移动焦点】，不是移动窗口：
+    //        h/l 在【列】之间跳（至少要两列才看得出变化）
+    //        j/k 在【同一列内】的窗口之间跳（至少要一列里有俩窗口）
+    //        移动窗口是下面的 super+[ / super+]
     Mod+H { focus-column-left; }
     Mod+J { focus-window-down; }
     Mod+K { focus-window-up; }
     Mod+L { focus-column-right; }
+    //  方向键等价别名（hjkl 不生效时用方向键对比，能快速判断是键位还是场景问题）
+    Mod+Left  { focus-column-left; }
+    Mod+Down  { focus-window-down; }
+    Mod+Up    { focus-window-up; }
+    Mod+Right { focus-column-right; }
 
     // (3) super + t → 打开终端 kitty
     Mod+T repeat=false hotkey-overlay-title="终端: @terminal@" {

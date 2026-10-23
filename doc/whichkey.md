@@ -28,10 +28,17 @@
 
 | 键位 | 动作 |
 | --- | --- |
-| `super + h` | 焦点移到左边的列 |
-| `super + j` | 焦点移到下面的窗口 |
-| `super + k` | 焦点移到上面的窗口 |
-| `super + l` | 焦点移到右边的列 |
+| `super + h` / `super + ←` | 焦点移到左边的**列** |
+| `super + j` / `super + ↓` | 焦点移到下面的窗口 |
+| `super + k` / `super + ↑` | 焦点移到上面的窗口 |
+| `super + l` / `super + →` | 焦点移到右边的**列** |
+
+> ⚠️ 这是**移动焦点**，不是移动窗口：
+> - `h/l` 在**列**之间跳 —— 至少要开两列（宽度不够时 niri 默认一列放一个窗口，
+>   所以先开 2 个以上窗口，或用 `super+[` / `super+]` 把窗口移成两列）
+> - `j/k` 在**同一列内**的窗口之间跳 —— 至少那一列里得有 2 个窗口
+> - 只有一个窗口时，按什么都不会有变化（不是配置问题）
+> - 想**移动窗口**用 `super+[` / `super+]`（列左右移动）
 
 ### 窗口 / 列移动（需求 6、7）
 
@@ -291,6 +298,7 @@ xkb = {
 | 休眠失败 | swap < 内存 或 没配 `boot.resumeDevice`，见[系统需求.md](系统需求.md) |
 | 截屏后找不到图 | 默认 `~/Pictures/Screenshots/`，路径在 config.kdl 的 `screenshot-path` |
 | CapsLock 没变成 Super | 确认 `vars.xkb.options = "caps:super"` 且已 `just switch`；再用 `wev` 抓一下按键，看发出的到底是 `Super_L` 还是 `Caps_Lock` |
+| `super+h/j/k/l` 没反应 | 先确认**开了 2 个以上窗口**（只有一个窗口/一列时本来就无变化）；再用终端直触发验证 action：`niri msg action focus-column-right`；还不行就看按键是否被应用/输入法拦截（`super+escape` 解除） |
 
 ---
 
