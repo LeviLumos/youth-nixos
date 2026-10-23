@@ -27,10 +27,13 @@
     ];
   };
 
-  # msime-linux-setup（首次配置用）随系统安装
-  environment.systemPackages = lib.mkIf vars.inputMethod.enable [
+  # 首次配置与日常管理用到的工具（pkgs 里存在才装，避免不同版本属性缺失导致求值失败）
+  environment.systemPackages = lib.mkIf vars.inputMethod.enable ([
     pkgs.msime-fcitx5
-  ];
+  ]
+  ++ lib.optional (pkgs ? msime-linux-setup) pkgs.msime-linux-setup   # --download 下载词库
+  ++ lib.optional (pkgs ? fcitx5-configtool) pkgs.fcitx5-configtool   # 图形界面添加输入法
+  ++ lib.optional (pkgs ? fcitx5-gtk) pkgs.fcitx5-gtk);               # GTK 程序的 IM 模块
 
   # 说明：GTK_IM_MODULE / QT_IM_MODULE / XMODIFIERS 三个环境变量
   #       由 i18n.inputMethod 自动设置，这里【不要再重复定义】，否则会冲突报错。
