@@ -55,10 +55,11 @@ just gc       # 清理 30 天前旧世代
 | 锁屏 | swaylock（`super+alt+l`） |
 | 通知 | mako |
 | 托盘 | tray-tui（`super+shift+t`，终端内） |
-| 输入法 | 水杉输入法 MSIME（fcitx5），开关 `vars.inputMethod.enable` |
+| 输入法 | 默认不安装；装好系统后按 `doc/系统需求.md` 三步开启（水杉 MSIME + fcitx5） |
 
 > 状态栏（waybar）已移除；需要可自行加回，步骤见 `doc/系统需求.md` 第九节。
-> 输入法首次使用需执行一次 `msime-linux-setup --download`（下载约 189MB 词库）。
+> 输入法默认关闭：启用后需从 GitHub 拉 `msime` 与 `chinese-ime-lm` 两个仓库，
+> 安装阶段易失败，建议进系统后再开。
 
 ## 文档
 
