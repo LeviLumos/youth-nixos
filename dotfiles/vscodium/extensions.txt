@@ -1,0 +1,35 @@
+# VSCodium 插件清单（OpenVSX ID，一行一个；# 开头为注释）
+#
+# 安装：just code-ext        （等价于 vscodium-install-extensions）
+# 源码：nix build 的插件用 OpenVSX，所以「微软专有、只发 VS Code Marketplace」的装不上，
+#       装不上的会在命令输出里标 ✗（常见：ms-python.vscode-pylance、ms-vscode-remote.*）
+antfu.unocss
+bbenoist.nix
+bradlc.vscode-tailwindcss
+catppuccin.catppuccin-vsc
+christian-kohler.path-intellisense
+dariofuzinato.vue-peek
+donjayamanne.githistory
+enkia.tokyo-night
+formulahendry.code-runner
+hediet.vscode-drawio
+maattdd.gitless
+mhutchie.git-graph
+ms-python.debugpy
+ms-python.python
+ms-python.vscode-pylance
+ms-toolsai.jupyter
+ms-toolsai.jupyter-keymap
+ms-toolsai.jupyter-renderers
+ms-toolsai.vscode-jupyter-cell-tags
+ms-toolsai.vscode-jupyter-slideshow
+ms-vscode-remote.remote-ssh
+ms-vscode-remote.remote-ssh-edit
+ms-vscode-remote.remote-wsl
+ms-vscode.remote-explorer
+octref.vetur
+oderwat.indent-rainbow
+pkief.material-icon-theme
+pomdtr.excalidraw-editor
+subframe7536.codeimg
+vscodevim.vim

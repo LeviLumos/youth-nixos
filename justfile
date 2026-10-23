@@ -53,6 +53,10 @@ hw:
 ime-setup:
     msime-linux-setup --download
 
+# 按清单安装 VSCodium 插件（读 ~/.config/VSCodium/extensions.txt）
+code-ext:
+    vscodium-install-extensions
+
 # 校验 Maple Mono 字体族名（改 vars.fonts.mono.family 用）
 font-check:
     fc-list | grep -i maple

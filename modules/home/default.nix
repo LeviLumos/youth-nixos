@@ -13,6 +13,7 @@
     ./kitty.nix          # home.file → ~/.config/kitty/kitty.conf
     ./zsh.nix            # home.file → ~/.zshrc
     ./desktop.nix        # 通知(mako) / 空闲(swayidle) / 托盘(tray-tui)
+    ./vscodium.nix       # VSCodium 的 settings/keybindings + 插件安装脚本
   ];
 
   home = {
