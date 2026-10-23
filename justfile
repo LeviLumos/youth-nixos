@@ -33,6 +33,7 @@ hw:
     sudo nixos-generate-config --show-hardware-config > hosts/{{ hostname }}/hardware-configuration.nix
 
 # 水杉输入法首次配置：下载词库并加入 fcitx5
+# ⚠️ 需先启用输入法（flake.nix 的 msime input + default.nix 的 import + vars.inputMethod.enable=true）
 ime-setup:
     msime-linux-setup --download
 

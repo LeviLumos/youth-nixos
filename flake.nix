@@ -27,11 +27,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # 水杉输入法（MSIME）：https://msime.app/ —— 提供 fcitx5 插件 overlay
-    msime = {
-      url = "github:metasequoiaime/msime";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # 水杉输入法（MSIME，https://msime.app/）—— 默认不启用，需要时把下面这段取消注释
+    # 并同时：modules/nixos/default.nix 打开 ./input-method.nix、vars.nix 里
+    # inputMethod.enable = true（详见 doc/系统需求.md「输入法」一节）
+    # msime = {
+    #   url = "github:metasequoiaime/msime";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
   # ---------------------------------------------------------------------------
@@ -43,7 +45,6 @@
     , home-manager
     , github-hosts
     , zen-browser
-    , msime
     , ...
     } @ inputs:
     let
@@ -59,7 +60,7 @@
 
         # 传给所有 NixOS 模块的额外参数
         specialArgs = {
-          inherit inputs vars github-hosts zen-browser msime;
+          inherit inputs vars github-hosts zen-browser;
         };
 
         modules = [

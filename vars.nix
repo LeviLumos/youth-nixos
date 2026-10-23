@@ -116,10 +116,14 @@ in
     screenOffAfter = 600;                           # 10 分钟无操作 → 关闭显示器
   };
 
-  # ---- 输入法 ----------------------------------------------------------------
-  #  水杉输入法（MSIME）：https://msime.app/  —— Linux 版提供 fcitx5 插件
+  # ---- 输入法（默认关闭）------------------------------------------------------
+  #  当前【不安装任何输入法】。
+  #  要用水杉输入法（MSIME，https://msime.app/）需三步：
+  #    1. flake.nix 里加回 msime input（文件里有注释好的代码块）
+  #    2. modules/nixos/default.nix 里取消 ./input-method.nix 的注释
+  #    3. 把下面的 enable 改成 true
   inputMethod = {
-    enable = true;
+    enable = false;
     framework = "fcitx5";                 # 官方 NixOS 方案只接了 fcitx5
   };
 

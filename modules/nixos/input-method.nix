@@ -1,15 +1,16 @@
 # =============================================================================
 #  输入法：水杉输入法（MSIME） https://msime.app/
 # -----------------------------------------------------------------------------
-#  官方 NixOS 方案：仓库自带 flake，提供 fcitx5 插件的 overlay。
-#  插件必须和系统的 fcitx5 来自同一份 nixpkgs，所以要用 overlay 注入。
-#
-#  ⚠️ 首次使用必做（每个用户跑一次，下载约 189MB 词库）：
+#  ⚠️ 本模块【默认不启用】：modules/nixos/default.nix 里已注释掉 import。
+#     启用需要三步：
+#       1. flake.nix      —— 取消 msime input 的注释（并加回 outputs 参数与 specialArgs）
+#       2. default.nix    —— 取消 ./input-method.nix 的注释
+#       3. vars.nix       —— inputMethod.enable = true
+#     启用后首次使用必做（每个用户跑一次，下载约 189MB 词库）：
 #       msime-linux-setup --download
-#     之后用 fcitx5-configtool 添加「水杉输入法」，或由上面的命令自动加入。
-#     升级后用 fcitx5 -r 或重新登录。
+#     之后用 fcitx5-configtool 添加「水杉输入法」；升级后 fcitx5 -r 或重新登录。
 #
-#  ⚠️ NixOS 上目前官方只接了 Fcitx5（没有设置窗口与语音输入）。
+#  ⚠️ NixOS 上官方目前只接了 Fcitx5（没有设置窗口与语音输入）。
 # =============================================================================
 { lib, inputs, pkgs, vars, ... }:
 {
