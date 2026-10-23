@@ -12,6 +12,10 @@
 
 `Mod` = `Super`（Windows 键 / Command 键）。
 
+> **本配置已把 CapsLock 映射成 Super/Mod**（`vars.xkb.options = "caps:super"`）。
+> 也就是说下面表里所有 `super + x`，实际按 **CapsLock + x** 即可，键盘最左下角那颗键就是 Mod；
+> 原来真正的 Win 键依然可用。想改回 CapsLock 原样，见第 6 节「修改键（CapsLock → Super）怎么改」。
+
 ### 启动器 / 终端 / 托盘
 
 | 键位 | 动作 | 备注 |
@@ -236,7 +240,45 @@ desktop.locker = "hyprlock";
 
 ---
 
-## 6. 排错
+## 6. 修改键（CapsLock → Super）怎么改
+
+映射不是在键位表里改的，而是 **XKB options**，一处生效全局：
+
+```nix
+# vars.nix
+xkb = {
+  layout  = "us";
+  variant = "";
+  options = "caps:super";     # ← 改这一行
+};
+```
+
+常用取值（可逗号叠加，如 `"caps:super,altwin:swap_alt_win"`）：
+
+| 值 | 效果 |
+| --- | --- |
+| `caps:super` | CapsLock → Super/Mod（**当前默认**） |
+| `caps:escape` | CapsLock → Esc（vim 用户常用） |
+| `caps:ctrl_modifier` | CapsLock → Ctrl（长按当 Ctrl， Emacs 系常用） |
+| `caps:swapescape` | 交换 CapsLock 与 Esc |
+| `altwin:swap_alt_win` | 交换 Alt 与 Super |
+| `""` | CapsLock 恢复原样 |
+
+它同时喂给两个地方（改一处即可）：
+
+| 消费方 | 位置 |
+| --- | --- |
+| X / XWayland 应用 | `modules/nixos/system.nix` 的 `services.xserver.xkb.options` |
+| niri（Wayland 原生） | `dotfiles/niri/config.kdl` 的 `input { keyboard { xkb { options } } }` |
+
+改完 `just switch`；niri 会热重载，XWayland 应用重开即可。
+
+> 想要「轻点=Esc、长按=Mod」这种高级玩法，需要在 niri 之外再加一层
+> （如 `interception-tools` / `keyd`），那就不是 XKB options 能做到的了，需要的话我再补。
+
+---
+
+## 7. 排错
 
 | 现象 | 原因 / 处理 |
 | --- | --- |
@@ -248,10 +290,11 @@ desktop.locker = "hyprlock";
 | `super+space` 没反应 | `fuzzel` 没装或没在 PATH；确认 `vars.niri.launcher` 与 `modules/home/packages.nix` |
 | 休眠失败 | swap < 内存 或 没配 `boot.resumeDevice`，见[系统需求.md](系统需求.md) |
 | 截屏后找不到图 | 默认 `~/Pictures/Screenshots/`，路径在 config.kdl 的 `screenshot-path` |
+| CapsLock 没变成 Super | 确认 `vars.xkb.options = "caps:super"` 且已 `just switch`；再用 `wev` 抓一下按键，看发出的到底是 `Super_L` 还是 `Caps_Lock` |
 
 ---
 
-## 7. 相关文档
+## 8. 相关文档
 
 - [`系统需求.md`](系统需求.md)：全局变量表、模块说明、安装与二次加工
 - [`kitty.md`](kitty.md)：终端内的键位与配置

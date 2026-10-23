@@ -46,6 +46,14 @@ in
   xkb = {
     layout = "us";                        # 输入法由 fcitx5(水杉) 接管，键盘布局保持 us
     variant = "";
+
+    # XKB options（逗号分隔，可叠加）。常用：
+    #   "caps:super"     CapsLock → Super/Mod（本配置默认，键位里的 Mod 就是它）
+    #   "caps:escape"    CapsLock → Esc（vim 用户常用）
+    #   "caps:ctrl_modifier"  CapsLock → Ctrl
+    #   ""               恢复 CapsLock 原样
+    #   "altwin:swap_alt_win"  交换 Alt 与 Super
+    options = "caps:super";
   };
 
   # ---- 引导 -----------------------------------------------------------------

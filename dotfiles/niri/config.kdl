@@ -11,7 +11,10 @@
 input {
     keyboard {
         xkb {
-            layout "us"
+            layout "@layout@"
+            // 默认 "caps:super"：CapsLock 当 Super/Mod 用（键位里的 Mod 就是它）
+            // 想恢复 CapsLock 原样：把 vars.xkb.options 改成 ""
+            options "@xkbOptions@"
         }
         // 开机开启小键盘
         numlock

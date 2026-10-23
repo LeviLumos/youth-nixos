@@ -15,6 +15,8 @@
       activeBorder = vars.theme.activeBorder;
       inactiveBorder = vars.theme.inactiveBorder;
       urgentBorder = vars.theme.urgentBorder;
+      layout = vars.xkb.layout;
+      xkbOptions = vars.xkb.options;
       terminal = vars.niri.terminal;
       launcher = vars.niri.launcher;
       wallpaperTool = vars.desktop.wallpaperTool;

@@ -19,9 +19,12 @@
 
   console.keyMap = vars.consoleKeymap;
 
+  # XKB：layout/variant/options 同时喂给 X(XWayland 应用) 与 niri
+  #  （niri 是 Wayland 合成器，不走 xserver 的配置，见 dotfiles/niri/config.kdl 的 input.keyboard.xkb）
   services.xserver.xkb = {
     layout = vars.xkb.layout;
     variant = vars.xkb.variant;
+    options = vars.xkb.options;           # 默认 "caps:super"：CapsLock → Super/Mod
   };
 
   # ---- Nix 与国内源（中科大 USTC）--------------------------------------------
