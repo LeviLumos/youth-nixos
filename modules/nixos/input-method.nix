@@ -13,6 +13,11 @@
 #  ⚠️ NixOS 上官方目前只接了 Fcitx5（没有设置窗口与语音输入）。
 # =============================================================================
 { lib, inputs, pkgs, vars, ... }:
+
+let
+  # tryPkg：能求值就返回 [ pkg ]，否则返回 []（改名别名 / 不存在都算拿不到）
+  tryPkg = p: lib.optional (p != null && builtins.tryEval p).success p;
+in
 {
   # 注入 msime-fcitx5 包（来自 github:metasequoiaime/msime 的 overlay）
   nixpkgs.overlays = [ inputs.msime.overlays.default ];
@@ -27,13 +32,16 @@
     ];
   };
 
-  # 首次配置与日常管理用到的工具（pkgs 里存在才装，避免不同版本属性缺失导致求值失败）
+  # 首次配置与日常管理用到的工具。
+  #  ⚠️ 有些包在 nixpkgs 里被改名/挪位置（如 fcitx5-configtool 在 26.05 挪进了
+  #     qt6Packages，顶层属性变成一碰就 throw 的「改名别名」），所以这里用
+  #     tryEval 探测：拿到就装、拿不到就跳过，绝不因此让整个求值失败。
   environment.systemPackages = lib.mkIf vars.inputMethod.enable ([
     pkgs.msime-fcitx5
   ]
-  ++ lib.optional (pkgs ? msime-linux-setup) pkgs.msime-linux-setup   # --download 下载词库
-  ++ lib.optional (pkgs ? fcitx5-configtool) pkgs.fcitx5-configtool   # 图形界面添加输入法
-  ++ lib.optional (pkgs ? fcitx5-gtk) pkgs.fcitx5-gtk);               # GTK 程序的 IM 模块
+  ++ tryPkg (pkgs.qt6Packages.fcitx5-configtool or null)   # 图形界面添加输入法
+  ++ tryPkg (pkgs.msime-linux-setup or null)               # --download 下载词库
+  ++ tryPkg (pkgs.fcitx5-gtk or null));                    # GTK 程序的 IM 模块
 
   # 说明：GTK_IM_MODULE / QT_IM_MODULE / XMODIFIERS 三个环境变量
   #       由 i18n.inputMethod 自动设置，这里【不要再重复定义】，否则会冲突报错。
