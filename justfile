@@ -16,6 +16,19 @@ test:
 switch:
     sudo nixos-rebuild switch --flake .
 
+# 临时开 zram swap：不用重建、不占磁盘，立刻生效（重启失效）
+# 长期方案是配置里的 zramSwap（modules/nixos/system.nix），但它要等这次重建成功才生效
+swap-on:
+    sudo modprobe zram
+    sudo zramctl --find --size 8G
+    sudo mkswap /dev/zram0
+    sudo swapon -p 100 /dev/zram0
+    free -h
+
+# 关掉临时 zram swap
+swap-off:
+    sudo swapoff /dev/zram0
+
 # 低内存构建：一次只构建一个 derivation、每个只用 2 核
 # （编译 Rust 之类被 OOM kill 时用；比 just switch 慢，但不容易被杀）
 switch-safe:
