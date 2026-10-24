@@ -49,9 +49,15 @@ gc-old:
 gc-status:
     systemctl list-timers nix-gc nix-optimise
 
-# 查看 /nix 占用与磁盘余量
+# 看磁盘余量与 /nix/store 占用（构建报 No space left on device 时先看这个）
 store-size:
-    du -sh /nix/store 2>/dev/null; df -h /nix
+    df -h / /nix /tmp 2>/dev/null; ls -lh /swapfile 2>/dev/null; du -sh /nix/store 2>/dev/null
+
+# 清旧世代 + store 去重（磁盘告急时先跑它）
+free-disk:
+    sudo nix-collect-garbage -d
+    nix store optimise
+    df -h / /nix
 
 # （重新）生成本机硬件配置到 hosts/<hostname>/
 hw:
