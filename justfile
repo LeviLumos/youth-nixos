@@ -16,9 +16,18 @@ test:
 switch:
     sudo nixos-rebuild switch --flake .
 
+# 低内存构建：一次只构建一个 derivation、每个只用 2 核
+# （编译 Rust 之类被 OOM kill 时用；比 just switch 慢，但不容易被杀）
+switch-safe:
+    sudo nixos-rebuild switch --flake . --option max-jobs 1 --option cores 2
+
 # 只构建，不切换
 build:
     sudo nixos-rebuild build --flake .
+
+# 看内存 / swap（判断是否 OOM 的现场证据）
+mem:
+    free -h; swapon --show
 
 # 更新 flake 依赖
 update:

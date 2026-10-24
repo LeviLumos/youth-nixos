@@ -19,6 +19,15 @@
 
   console.keyMap = vars.consoleKeymap;
 
+  # ---- 内存兜底：zram swap（压缩内存当交换分区）--------------------------------
+  #  从源码编译重型项目（水杉输入法的 Rust 依赖链）时容易把内存打满被 OOM kill，
+  #  zram 用一部分内存做压缩 swap，比没有 swap 稳得多（重启后自动生效）
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50;                  # 用 50% 内存作为 zram（可改 25~100）
+    algorithm = "zstd";                  # 压缩算法：zstd / lz4
+  };
+
   # XKB：layout/variant/options 同时喂给 X(XWayland 应用) 与 niri
   #  （niri 是 Wayland 合成器，不走 xserver 的配置，见 dotfiles/niri/config.kdl 的 input.keyboard.xkb）
   services.xserver.xkb = {
