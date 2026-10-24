@@ -16,7 +16,8 @@
 
 let
   # tryPkg：能求值就返回 [ pkg ]，否则返回 []（改名别名 / 不存在都算拿不到）
-  tryPkg = p: lib.optional (p != null && builtins.tryEval p).success p;
+  #  ⚠️ Nix 的 && 两边都必须是布尔值，所以这里只能用 if，不能写 p != null && ...
+  tryPkg = p: if p == null then [ ] else lib.optional (builtins.tryEval p).success p;
 in
 {
   # 注入 msime-fcitx5 包（来自 github:metasequoiaime/msime 的 overlay）
