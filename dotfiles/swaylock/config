@@ -3,7 +3,8 @@
 # -----------------------------------------------------------------------------
 #  部署：modules/home/desktop.nix → ~/.config/swaylock/config
 #  占位符：@background@ / @foreground@ / @accent@ / @fontFamily@（构建期替换）
-#  ⚠️ 本文件里任何 @xxx@（注释里也算）都必须在 desktop.nix 的替换表里
+#  ⚠️ 本文件里出现的 @background@ / @foreground@ / @accent@ / @fontFamily@
+#     都必须在 desktop.nix 的替换表里（注释里写的也算，会被引擎检查）
 #
 #  颜色格式：RRGGBB 或 RRGGBBAA（不带 #；desktop.nix 替换时已去掉）
 #  截图里那个红色圆圈 = 「密码错误」指示器，下面把它配成了主题色
