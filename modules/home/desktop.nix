@@ -46,6 +46,17 @@ in
     };
   };
 
+  # ---- 锁屏样式（swaylock）---------------------------------------------------
+  #  原生 swaylock 零配置 = 灰底 + 大色块指示器（很丑）；这里铺桌面同款壁纸、
+  #  指示器走主题色。颜色是 RRGGBB（不带 #），所以替换时把 vars 里的 # 去掉
+  home.file.".config/swaylock/config".source =
+    pkgs.replaceVars ../../dotfiles/swaylock/config {
+      background = lib.removePrefix "#" vars.theme.background;
+      foreground = lib.removePrefix "#" vars.theme.foreground;
+      accent = lib.removePrefix "#" vars.theme.accent;
+      fontFamily = vars.fonts.mono.family;
+    };
+
   # ---- 空闲行为：自动锁屏 / 关屏 / 挂起 / 休眠 --------------------------------
   #  查看状态：systemctl --user status swayidle
   services.swayidle = {
