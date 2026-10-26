@@ -22,6 +22,21 @@ let
 
   idleEnabled =
     d.lockAfter > 0 || d.screenOffAfter > 0 || p.suspendAfter > 0 || p.hibernateAfter > 0;
+
+  # 随机选一张壁纸并 exec swaybg（找不到图时用主题纯色兜底）
+  #  同时把选中的图软链到 ~/Pictures/wallpaper.jpg —— swaylock 锁屏背景读它，
+  #  这样锁屏永远和桌面显示同一张当前壁纸
+  wallpaperRandom = pkgs.writeShellScriptBin "wallpaper-random" ''
+    dir="$HOME/${vars.desktop.wallpaperDir}"
+    img=$(find "$dir" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) | shuf -n1)
+    if [ -z "$img" ]; then
+      echo "壁纸池为空：$dir —— 使用主题纯色兜底" >&2
+      rm -f "$HOME/Pictures/wallpaper.jpg"          # 别给 swaylock 留悬空软链
+      exec ${lib.getExe pkgs.${vars.desktop.wallpaperTool}} -c '${vars.theme.background}'
+    fi
+    ln -sfn "$img" "$HOME/Pictures/wallpaper.jpg"
+    exec ${lib.getExe pkgs.${vars.desktop.wallpaperTool}} -i "$img" --mode fill
+  '';
 in
 {
   # ---- 通知守护进程 ---------------------------------------------------------
@@ -45,6 +60,52 @@ in
       progress-color = vars.theme.accent;
     };
   };
+
+  # ---- 壁纸池 + 随机轮换 -------------------------------------------------------
+  #  dotfiles/wallpapers/ 部署到 ~/Pictures/wallpapers；
+  #  wallpaper.service 登录时随机选一张；rotateWallpaper=true 时定时 restart 换一张
+  #  （systemd 重启服务会连旧 swaybg 一起杀掉，所以不用 pkill）
+  home.file."${vars.desktop.wallpaperDir}" = {
+    source = ../../dotfiles/wallpapers;
+    recursive = true;
+  };
+
+  # 登录起一张随机壁纸（systemd 重启本服务 = 换一张，旧 swaybg 被连进程带 cgroup 清掉）
+  systemd.user.services.wallpaper = {
+    Unit = {
+      Description = "随机设置一张壁纸（swaybg）";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${wallpaperRandom}/bin/wallpaper-random";
+      Restart = "on-failure";
+      RestartSec = "5s";
+    };
+    Install = { WantedBy = [ "graphical-session.target" ]; };
+  };
+
+  # 定时轮换：timer 触发这个 oneshot，由它 restart wallpaper.service（= 换一张）
+  systemd.user.services.wallpaper-cycle = lib.mkIf vars.desktop.rotateWallpaper {
+    Unit = { Description = "换一张壁纸（restart wallpaper.service）"; };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${systemctl} --user restart wallpaper.service";
+    };
+  };
+
+  systemd.user.timers.wallpaper-cycle = lib.mkIf vars.desktop.rotateWallpaper {
+    Unit = { Description = "定时轮换壁纸"; };
+    Timer = {
+      OnCalendar = vars.desktop.rotateInterval;
+      Persistent = true;
+      Unit = "wallpaper-cycle.service";
+    };
+    Install = { WantedBy = [ "timers.target" ]; };
+  };
+
+  home.packages = [ wallpaperRandom ];
 
   # ---- 锁屏样式（swaylock）---------------------------------------------------
   #  原生 swaylock 零配置 = 灰底 + 大色块指示器（很丑）；这里铺桌面同款壁纸、

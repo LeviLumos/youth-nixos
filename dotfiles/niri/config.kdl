@@ -90,8 +90,9 @@ animations {
 }
 
 // ---- 开机自启动 ----------------------------------------------------------------
-//  壁纸（用 sh 执行，~ 会被展开；文件不存在时 swaybg 会退出，不影响其它功能）
-spawn-sh-at-startup "@wallpaperTool@ -i @wallpaper@ --mode fill"
+//  壁纸：不再在这里拉起 —— 由 systemd 用户服务 wallpaper.service 负责
+//  （登录随机选 ~/Pictures/wallpapers/ 里一张，vars.desktop.rotateWallpaper=true
+//   时按 vars.desktop.rotateInterval 定时轮换；见 modules/home/desktop.nix）
 //  系统信息（fastfetch）：--hold 让终端执行完不关闭
 spawn-sh-at-startup "@terminal@ --hold fastfetch"
 //  如果 mako 通知没起来，取消下面这行注释（与 home-manager 的 mako 服务二选一）

@@ -19,8 +19,6 @@
       xkbOptions = vars.xkb.options;
       terminal = vars.niri.terminal;
       launcher = vars.niri.launcher;
-      wallpaperTool = vars.desktop.wallpaperTool;
-      wallpaper = vars.desktop.wallpaper;
       locker = vars.desktop.locker;
       tray = vars.desktop.tray;
     };

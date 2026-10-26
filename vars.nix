@@ -147,7 +147,9 @@ in
   # ---- 桌面组件（状态栏 / 壁纸 / 锁屏 / 通知 / 托盘）---------------------------
   desktop = {
     wallpaperTool = "swaybg";                       # 设置壁纸的工具
-    wallpaper = "~/Pictures/wallpaper.jpg";         # 壁纸路径（会被 sh 展开 ~）
+    wallpaperDir = "Pictures/wallpapers";           # 壁纸池（dotfiles/wallpapers/ 部署到这里）
+    rotateWallpaper = true;                         # true = 定时随机轮换壁纸（systemd timer）
+    rotateInterval = "hourly";                      # 轮换频率（OnCalendar）：hourly / daily / "00 12 * * *"…
     locker = "swaylock";                            # 锁屏（super+alt+l）
     tray = "tray-tui";                              # 终端里的系统托盘（super+shift+t）
 
