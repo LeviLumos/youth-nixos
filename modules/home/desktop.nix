@@ -37,6 +37,24 @@ let
     ln -sfn "$img" "$HOME/Pictures/wallpaper.jpg"
     exec ${lib.getExe pkgs.${vars.desktop.wallpaperTool}} -i "$img" --mode fill
   '';
+
+  # ---- 多媒体键脚本（niri 键位绑定，见 dotfiles/niri/config.kdl）----------------
+  #  音量走 wpctl（wireplumber 自带，PipeWire 的会话管理器）；亮度走 brightnessctl
+  volumeUp = pkgs.writeShellScriptBin "volume-up" ''
+    exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+  '';
+  volumeDown = pkgs.writeShellScriptBin "volume-down" ''
+    exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+  '';
+  volumeMute = pkgs.writeShellScriptBin "volume-mute" ''
+    exec ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+  '';
+  brightnessUp = pkgs.writeShellScriptBin "brightness-up" ''
+    exec ${lib.getExe pkgs.brightnessctl} set +5%
+  '';
+  brightnessDown = pkgs.writeShellScriptBin "brightness-down" ''
+    exec ${lib.getExe pkgs.brightnessctl} set 5%-
+  '';
 in
 {
   # ---- 通知守护进程 ---------------------------------------------------------
@@ -105,7 +123,15 @@ in
     Install = { WantedBy = [ "timers.target" ]; };
   };
 
-  home.packages = [ wallpaperRandom ];
+  home.packages = [
+    wallpaperRandom
+    volumeUp
+    volumeDown
+    volumeMute
+    brightnessUp
+    brightnessDown
+    pkgs.brightnessctl                       # 命令行调亮度也常用：brightnessctl set 50%
+  ];
 
   # ---- 锁屏样式（swaylock）---------------------------------------------------
   #  原生 swaylock 零配置 = 灰底 + 大色块指示器（很丑）；这里铺桌面同款壁纸、

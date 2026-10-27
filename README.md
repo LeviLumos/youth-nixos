@@ -66,6 +66,7 @@ just gc       # 清理 30 天前旧世代
 
 ## 文档
 
+- [`doc/使用指南.md`](doc/使用指南.md)：**日常使用**（Wi-Fi / 蓝牙 / 音量 / 亮度 / 截图 / 电源 / 更新回滚 / 排错速查 / just 命令一览）
 - [`doc/系统需求.md`](doc/系统需求.md)：需求、已确认决策、变量表、安装、二次加工、注意项
 - [`doc/whichkey.md`](doc/whichkey.md)：**键位速查**（super+space/t/q/hjkl …）+ 怎么自己改键位
 - [`doc/zsh.md`](doc/zsh.md)：zsh 配置详解与扩展方式

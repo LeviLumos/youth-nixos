@@ -75,6 +75,14 @@
 | `super + alt + h` | 休眠 `systemctl hibernate` | 电源，需 swap ≥ 内存 |
 | `super + alt + w` | 先挂起，2h 后转休眠 | 电源 |
 
+### 多媒体键（音量 / 亮度）
+
+| 键位 | 动作 | 备注 |
+| --- | --- | --- |
+| `音量 +` / `音量 −` | 默认输出 ±5%（长按连调） | 脚本 `volume-up/down`（`modules/home/desktop.nix`，走 `wpctl`） |
+| `静音键` | 默认输出静音切换 | `volume-mute` |
+| `亮度 +` / `亮度 −` | 屏幕亮度 ±5%（长按连调） | `brightness-up/down`（走 `brightnessctl`） |
+
 ### 截屏 / 系统
 
 | 键位 | 动作 | 备注 |
@@ -227,13 +235,15 @@ desktop.locker = "hyprlock";
     Mod+I { move-window-to-workspace-down; }
 ```
 
-### 加一组音量键（PipeWire 已启用）
+### 音量 / 亮度键（已内置）
 
-```kdl
-    XF86AudioRaiseVolume { spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ +5%"; }
-    XF86AudioLowerVolume { spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ -5%"; }
-    XF86AudioMute        { spawn-sh "pactl set-sink-mute @DEFAULT_SINK@ toggle"; }
-```
+多媒体键已经默认绑好（见第 1 节「多媒体键」），**不需要再加**。
+原理：键位绑到 `volume-up` / `brightness-up` 等小脚本（在 `modules/home/desktop.nix` 的 let 里，
+音量走 `wpctl`、亮度走 `brightnessctl`），想改步长（默认 5%）就改那些脚本。
+
+> 想自己写的话：**别**在 config.kdl 里直接写 `wpctl set-volume @DEFAULT_AUDIO_SINK@ …` ——
+> `@DEFAULT_AUDIO_SINK@` 长得像占位符，会被 `pkgs.replaceVars` 当成未替换的 `@xxx@` 让构建失败
+> （wpctl 的 `@…@` 是它自己的选择器语法，和我们的占位符机制撞了）。写进 shell 脚本就没这问题。
 
 ### 让某个键位不被应用抢走（远程桌面/游戏）
 

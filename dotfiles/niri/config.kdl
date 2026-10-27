@@ -153,6 +153,14 @@ binds {
     Super+Alt+H hotkey-overlay-title="休眠 (hibernate)" { spawn-sh "systemctl hibernate"; }
     Super+Alt+W hotkey-overlay-title="先挂起，2h 后转休眠" { spawn-sh "systemctl suspend-then-hibernate"; }
 
+    //  多媒体键：音量 / 静音 / 亮度（键盘 Fn 区那排）
+    //  脚本实现见 modules/home/desktop.nix：音量走 wpctl（PipeWire），亮度走 brightnessctl
+    XF86AudioRaiseVolume repeat=true hotkey-overlay-title="音量 +" { spawn "volume-up"; }
+    XF86AudioLowerVolume repeat=true hotkey-overlay-title="音量 −" { spawn "volume-down"; }
+    XF86AudioMute repeat=false hotkey-overlay-title="静音" { spawn "volume-mute"; }
+    XF86MonBrightnessUp repeat=true hotkey-overlay-title="亮度 +" { spawn "brightness-up"; }
+    XF86MonBrightnessDown repeat=true hotkey-overlay-title="亮度 −" { spawn "brightness-down"; }
+
     // -------------------------------------------------------------------------
     // 保底/常用键位（不属于需求，但强烈建议保留，否则可能“出不去”）
     // -------------------------------------------------------------------------
