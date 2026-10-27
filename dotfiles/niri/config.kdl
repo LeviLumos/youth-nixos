@@ -97,6 +97,8 @@ animations {
 spawn-sh-at-startup "@terminal@ --hold fastfetch"
 //  如果 mako 通知没起来，取消下面这行注释（与 home-manager 的 mako 服务二选一）
 //  spawn-at-startup "mako"
+//  输入法 fcitx5：正常由 XDG autostart 拉起；这里兜底 —— 没跑才启动，不会重复实例
+spawn-sh-at-startup "pgrep -x fcitx5 >/dev/null || fcitx5 -d"
 
 // ---- 键位绑定 ------------------------------------------------------------------
 //  Mod = Super（TTY 下）；需求里的 super 即 Mod

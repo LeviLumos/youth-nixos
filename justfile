@@ -76,6 +76,10 @@ free-disk:
 hw:
     sudo nixos-generate-config --show-hardware-config > hosts/{{ hostname }}/hardware-configuration.nix
 
+# 重启输入法 fcitx5（改了方案/词库后让它重新加载；不行就重新登录）
+ime-restart:
+    fcitx5 -rd || fcitx5 -d
+
 # 安装/更新雾凇拼音 rime-ice（方案 + 词库）到 Rime 用户目录
 # 前提：输入法已启用（vars.inputMethod.enable = true），且机器能访问 github.com
 #       （克隆用的是 git over https，和平时 git pull 一样，不碰 raw.githubusercontent.com）
