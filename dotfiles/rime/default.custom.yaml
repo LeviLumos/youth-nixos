@@ -1,20 +1,33 @@
 # =============================================================================
-#  Rime 输入法定制（雾凇拼音 rime-ice 的用户配置）
+#  Rime 方案选择：默认 = 小鹤双拼（rime-ice 的 double_pinyin_flypy）
 # -----------------------------------------------------------------------------
 #  部署：home.file → ~/.local/share/fcitx5/rime/default.custom.yaml
-#  作用：把 Rime 的默认方案从「朙月拼音」切成「雾凇双拼」（double_pinyin）
+#  机制：本文件 patch 掉 rime-ice 自带的 default.yaml，把 schema_list 换成小鹤双拼
 #
-#  ⚠️ 本文件只负责【选方案】；雾凇的方案文件与词库不在 nix 里（要访问 GitHub），
-#     用一条命令装进同一个目录：just rime-ice（见 justfile）
-#  ⚠️ 雾凇的双拼默认是【自然码】键位；想要小鹤/微软等其它键位，
-#     参考仓库 README 的 double_pinyin.custom.yaml 示例（https://github.com/iDvel/rime-ice）
+#  ⚠️ 方案文件与词库不在 nix 里（在 GitHub）：just rime-ice
+#  ⚠️ 换双拼方案：改下面的 schema 值即可，rime-ice 里实际存在的文件名：
+#       double_pinyin_flypy    小鹤双拼（当前）
+#       double_pinyin          自然码
+#       double_pinyin_mspy     微软双拼
+#       double_pinyin_abc      智能 ABC
+#       double_pinyin_jiajia   拼音加加
+#       double_pinyin_sogou    搜狗双拼
+#       double_pinyin_ziguang  紫光双拼
+#       rime_ice / melt_eng    雾凇全拼 / 英文输入
 # =============================================================================
 patch:
-  # 输入方案列表：只留雾凇双拼；想并列多个方案就往列表里加
   schema_list:
-    - schema: double_pinyin
+    - schema: double_pinyin_flypy
 
-  # 菜单/快捷键沿用雾凇默认（default.yaml），按需取消注释：
-  # "menu/page_size": 9        # 候选词个数（默认 9）
-  # "switcher/hotkeys":        # 方案切换快捷键（默认 F4 / Control+grave）
+  # 没跑 just rime-ice（词库还没装）时，上面那个方案不存在、会没候选词。
+  # 这时取消下面两行注释，先用 Rime 自带的「朙月拼音」顶着：
+  #   - schema: luna_pinyin
+
+  # 常用定制位（按需取消注释）：
+  # "menu/page_size": 9            # 候选词个数（默认 9）
+  # "switcher/hotkeys":            # 方案切换快捷键（默认 F4 / Control+grave）
   #   - "Control+grave"
+  # "ascii_composer/good_old_caps_lock": false   # CapsLock 是否切中英
+  # "key_binder/bindings/+":       # 例如减号/等号翻页
+  #   - { when: paging, accept: minus, send: Page_Up }
+  #   - { when: paging, accept: equal, send: Page_Down }
