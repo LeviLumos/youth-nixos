@@ -106,8 +106,15 @@ ime-doctor:
     #!/usr/bin/env bash
     d="$HOME/.local/share/fcitx5/rime"
     echo "== 1. fcitx5 进程 =="
-    pgrep -ax fcitx5 || echo "  ✗ fcitx5 没在跑（fcitx5 -d 启动）"
-    ps -o pid=,lstart= -p "$(pgrep -x fcitx5 | head -1)" 2>/dev/null | sed 's/^/  启动于 /'
+    ps -eo pid,user,lstart,cmd | grep '[f]citx5' | sed 's/^/  /' || echo "  ✗ 没有 fcitx5 进程（fcitx5 -d 启动）"
+    # ⚠️ 不能只看进程：老实例可能还占着 D-Bus 名字，新实例会因重名起不来
+    dbus_pid="$(busctl --user status org.fcitx.Fcitx5 2>/dev/null | grep -m1 '^PID' | awk '{print $2}')"
+    if [ -n "$dbus_pid" ]; then
+      echo "  ✓ D-Bus 名字持有者 PID=$dbus_pid（$(ps -o lstart= -p "$dbus_pid" 2>/dev/null)）"
+      echo "    ⚠️ 若这个 PID 启动时间早于你最后一次 just switch，它用的还是旧配置：kill -9 $dbus_pid 后 fcitx5 -d"
+    else
+      echo "  ✗ D-Bus 上 org.fcitx.Fcitx5 无人持有 —— fcitx5 实际不可用"
+    fi
     echo "== 2. 界面主题 =="
     f="$HOME/.config/fcitx5/conf/classicui.conf"
     if [ -f "$f" ]; then
@@ -133,8 +140,13 @@ ime-reset:
     #!/usr/bin/env bash
     set -euo pipefail
     d="$HOME/.local/share/fcitx5/rime"
-    pkill -x fcitx5 2>/dev/null || true
+    # 按完整命令行杀（-x 严格名匹配逮不到某些老进程）；顺带清掉水杉时代的
+    # msime 剪贴板监视进程（命令行里也含 fcitx5 字样，一并死掉正合适）
+    pkill -9 -f fcitx5 2>/dev/null || true
     sleep 1
+    if busctl --user status org.fcitx.Fcitx5 >/dev/null 2>&1; then
+      echo "✗ D-Bus 名字仍被持有，杀不干净 —— 跑 busctl --user status org.fcitx.Fcitx5 看 PID"; exit 1
+    fi
     rm -f "$d/user.yaml"        # 清掉「繁体」等被记住的开关状态
     rm -rf "$d/build"           # 强制 Rime 重新部署（重读所有 custom.yaml 补丁）
     fcitx5 -d >/dev/null 2>&1 || true
