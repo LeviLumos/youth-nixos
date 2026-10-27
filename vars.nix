@@ -164,6 +164,13 @@ in
   inputMethod = {
     enable = true;                       # 输入法总开关
     framework = "fcitx5";                # NixOS 官方方案目前只接了 fcitx5
+
+    # 输入法外观主题（写进 ~/.config/fcitx5/conf/classicui.conf 的 Theme=）
+    #   "youth"   —— 自建主题：配色跟随 vars.theme.*（默认，见 dotfiles/fcitx5/theme.conf）
+    #   "default" —— fcitx5 内置浅色主题
+    #   "dark"    —— fcitx5 内置深色主题（若该版本没带，会自动回退 default）
+    # ⚠️ 改完要 just switch（部署配置）+ just ime-restart（fcitx5 重新加载）才生效
+    theme = "youth";
   };
 
   # ---- niri ------------------------------------------------------------------

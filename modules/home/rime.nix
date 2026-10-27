@@ -30,6 +30,7 @@
 
   home.file.".config/fcitx5/conf/classicui.conf".source =
     pkgs.replaceVars ../../dotfiles/fcitx5/classicui.conf {
+      imeTheme = vars.inputMethod.theme;   # youth / default / dark（vars.nix）
       fontFamily = vars.fonts.mono.family;
       fontSize = toString vars.fonts.mono.size;
     };

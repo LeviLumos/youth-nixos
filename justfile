@@ -94,6 +94,13 @@ wallpaper-set img:
 ime-restart:
     fcitx5 -rd || fcitx5 -d
 
+# 查看输入法当前主题 / 已装主题（切换见 vars.nix 的 inputMethod.theme）
+ime-theme:
+    #!/usr/bin/env bash
+    echo "当前主题: $(grep -m1 '^Theme=' "$HOME/.config/fcitx5/conf/classicui.conf" | cut -d= -f2)"
+    echo "已装主题: $(ls "$HOME/.local/share/fcitx5/themes" 2>/dev/null | tr '\n' ' ')"
+    echo "切换方法: vars.nix 里 inputMethod.theme = \"youth\" | \"default\" | \"dark\"，然后 just switch && just ime-restart"
+
 # 安装/更新雾凇拼音 rime-ice（方案 + 词库）到 Rime 用户目录
 # 前提：输入法已启用（vars.inputMethod.enable = true），且机器能访问 github.com
 #       （克隆用的是 git over https，和平时 git pull 一样，不碰 raw.githubusercontent.com）
