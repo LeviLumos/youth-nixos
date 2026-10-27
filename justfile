@@ -76,6 +76,20 @@ free-disk:
 hw:
     sudo nixos-generate-config --show-hardware-config > hosts/{{ hostname }}/hardware-configuration.nix
 
+# 壁纸：立刻随机换一张（从 ~/Pictures/wallpapers 里抽）
+wallpaper:
+    systemctl --user restart wallpaper.service
+
+# 壁纸：临时指定某一张（不进轮换池；想固定就把它单独放进壁纸池并关掉轮换）
+# 用法：just wallpaper-set ~/Downloads/xxx.jpg
+wallpaper-set img:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    systemctl --user stop wallpaper.service
+    ln -sfn "{{ img }}" "$HOME/Pictures/wallpaper.jpg"   # 锁屏背景跟着变
+    nohup swaybg -i "{{ img }}" --mode fill >/dev/null 2>&1 &
+    echo "已设为：{{ img }}（重新登录或 just wallpaper 后回到轮换）"
+
 # 重启输入法 fcitx5（改了方案/词库后让它重新加载；不行就重新登录）
 ime-restart:
     fcitx5 -rd || fcitx5 -d

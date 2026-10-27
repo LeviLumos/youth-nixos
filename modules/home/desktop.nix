@@ -80,13 +80,23 @@ in
   };
 
   # ---- 壁纸池 + 随机轮换 -------------------------------------------------------
-  #  dotfiles/wallpapers/ 部署到 ~/Pictures/wallpapers；
+  #  ~/Pictures/wallpapers 是【真实目录】：首次 switch 把仓库 dotfiles/wallpapers/ 的图
+  #  拷进去；之后自己往里丢 jpg/png/webp 也会被轮换到（`just wallpaper` 立刻换一张）。
   #  wallpaper.service 登录时随机选一张；rotateWallpaper=true 时定时 restart 换一张
   #  （systemd 重启服务会连旧 swaybg 一起杀掉，所以不用 pkill）
-  home.file."${vars.desktop.wallpaperDir}" = {
-    source = ../../dotfiles/wallpapers;
-    recursive = true;
-  };
+  #
+  #  ⚠️ 这里【不能】用 home.file + recursive 部署整个目录：那样
+  #     ~/Pictures/wallpapers 会变成指向 /nix/store 的软链（只读，丢不进图、删不掉）。
+  #     所以用 home.activation 拷一次（已存在的同名文件不覆盖）
+  home.activation.seedWallpapers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dir="$HOME/${vars.desktop.wallpaperDir}"
+    if [ -L "$dir" ]; then rm -f "$dir"; fi      # 旧版是 store 软链 → 换成真实目录
+    mkdir -p "$dir"
+    for f in ${../../dotfiles/wallpapers}/*; do
+      name="$(basename "$f")"
+      [ -e "$dir/$name" ] || cp "$f" "$dir/$name"
+    done
+  '';
 
   # 登录起一张随机壁纸（systemd 重启本服务 = 换一张，旧 swaybg 被连进程带 cgroup 清掉）
   systemd.user.services.wallpaper = {
