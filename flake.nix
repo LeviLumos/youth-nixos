@@ -26,15 +26,6 @@
       url = "github:youwen5/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # 水杉输入法（MSIME，https://msime.app/）—— 默认关闭，见 doc/系统需求.md「输入法」
-    # ⚠️ 启用后 nix 会去拉 github.com/metasequoiaime/msime 及其依赖
-    #    github.com/metasequoiaime/chinese-ime-lm（语言模型仓库，体积大）。
-    #    国内网络直连 GitHub 经常失败 —— 安装阶段务必保持注释状态。
-    # msime = {
-    #   url = "github:metasequoiaime/msime";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
   };
 
   # ---------------------------------------------------------------------------

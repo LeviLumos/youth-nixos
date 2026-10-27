@@ -76,12 +76,8 @@ free-disk:
 hw:
     sudo nixos-generate-config --show-hardware-config > hosts/{{ hostname }}/hardware-configuration.nix
 
-# 水杉输入法词库下载（仅 engine = "msime" 时需要；rime 无需任何首次配置）
-ime-setup:
-    msime-linux-setup --download
-
-# 安装雾凇拼音 rime-ice（含双拼方案与词库）到 Rime 用户目录
-# 前提：vars.inputMethod.engine = "rime"，且机器能访问 github.com
+# 安装/更新雾凇拼音 rime-ice（方案 + 词库）到 Rime 用户目录
+# 前提：输入法已启用（vars.inputMethod.enable = true），且机器能访问 github.com
 #       （克隆用的是 git over https，和平时 git pull 一样，不碰 raw.githubusercontent.com）
 # 默认方案由 dotfiles/rime/default.custom.yaml 指定为雾凇双拼（nix 部署，无需手动改）
 rime-ice:

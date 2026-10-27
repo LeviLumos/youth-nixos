@@ -20,7 +20,7 @@
   console.keyMap = vars.consoleKeymap;
 
   # ---- 内存兜底：zram swap（压缩内存当交换分区）--------------------------------
-  #  从源码编译重型项目（水杉输入法的 Rust 依赖链）时容易把内存打满被 OOM kill，
+  #  从源码编译重型包（浏览器、Rust 项目等）时容易把内存打满被 OOM kill，
   #  zram 用一部分内存做压缩 swap，比没有 swap 稳得多（重启后自动生效）
   zramSwap = {
     enable = true;

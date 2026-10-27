@@ -44,7 +44,7 @@ in
   ];
   consoleKeymap = "us";
   xkb = {
-    layout = "us";                        # 输入法由 fcitx5(水杉) 接管，键盘布局保持 us
+    layout = "us";                        # 输入法由 fcitx5(Rime) 接管，键盘布局保持 us
     variant = "";
 
     # XKB options（逗号分隔，可叠加）。常用：
@@ -159,13 +159,11 @@ in
   };
 
   # ---- 输入法 -------------------------------------------------------------------
-  #  默认 fcitx5 + Rime：nixpkgs 自带、走二进制缓存，构建不碰 GitHub。
-  #  想换水杉（MSIME）：engine = "msime"，且要能访问 github.com 与
-  #  raw.githubusercontent.com，并按 flake.nix 注释开启 msime input —— 见 doc/系统需求.md 第九节。
+  #  fcitx5 + Rime（中州韵）：nixpkgs 自带、走二进制缓存，构建不碰 GitHub。
+  #  默认方案 = 雾凇双拼，词库第一次用 `just rime-ice` 装（见 doc/系统需求.md 第九节）
   inputMethod = {
     enable = true;                       # 输入法总开关
     framework = "fcitx5";                # NixOS 官方方案目前只接了 fcitx5
-    engine = "rime";                     # "rime"（默认，免构建）/ "msime"（水杉，要 GitHub）
   };
 
   # ---- niri ------------------------------------------------------------------

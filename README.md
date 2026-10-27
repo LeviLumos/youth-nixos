@@ -59,10 +59,10 @@ just gc       # 清理 30 天前旧世代
 | 锁屏 | swaylock（`super+alt+l`） |
 | 通知 | mako |
 | 托盘 | tray-tui（`super+shift+t`，终端内） |
-| 输入法 | fcitx5 + Rime（nixpkgs 自带，免构建；`vars.inputMethod.engine` 可换水杉 MSIME） |
+| 输入法 | fcitx5 + Rime（nixpkgs 自带，免构建）；默认方案**雾凇双拼**，词库 `just rime-ice` |
 
 > 状态栏（waybar）已移除；需要可自行加回，步骤见 `doc/系统需求.md` 第九节。
-> 输入法默认 Rime（构建不碰 GitHub）；水杉 MSIME 需能访问 GitHub 且构建重，见 `doc/系统需求.md` 第九节。
+> 输入法默认 Rime + 雾凇双拼（构建不碰 GitHub，词库用 `just rime-ice` 装一次），见 `doc/系统需求.md` 第九节。
 
 ## 文档
 

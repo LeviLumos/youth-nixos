@@ -7,7 +7,7 @@
     ./network.nix         # 主机名 / NetworkManager / GitHub520 hosts
     ./graphics.nix        # 显卡（AMD 核显，由 vars.graphics.gpu 选择）
     ./desktop.nix         # niri + Wayland 支撑 + 字体 + swaylock PAM + 可选 greetd
-    ./input-method.nix    # 输入法 fcitx5+Rime（vars.inputMethod.*，engine 可换水杉 msime）
+    ./input-method.nix    # 输入法 fcitx5 + Rime（vars.inputMethod.*）
     ./bluetooth.nix       # 蓝牙（由 vars.hardware.bluetooth 开关）
     ./printing.nix        # 打印 CUPS + 扫描 SANE（由 vars.hardware.* 开关）
     ./containers.nix      # 容器 podman（rootless + docker 兼容，vars.virtualisation.podman）
