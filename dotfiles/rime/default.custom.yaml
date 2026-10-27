@@ -23,6 +23,17 @@ patch:
   # 这时取消下面两行注释，先用 Rime 自带的「朙月拼音」顶着：
   #   - schema: luna_pinyin
 
+  # ---- 简繁 -------------------------------------------------------------------
+  #  默认就是简体（方案里 traditionalization 的 states 是 [简, 繁] 且无 reset）。
+  #  这里把 traditionalization 从「方案选单记忆」里去掉：
+  #  简繁状态不再被写进 user.yaml，每次启动都回到简体；
+  #  临时要打繁体按 Ctrl+Shift+4，用完重启 fcitx5 即恢复简体。
+  "switcher/save_options":
+    - ascii_punct
+    - emoji
+    - full_shape
+    - search_single_char
+
   # 常用定制位（按需取消注释）：
   # "menu/page_size": 9            # 候选词个数（默认 9）
   # "switcher/hotkeys":            # 方案切换快捷键（默认 F4 / Control+grave）

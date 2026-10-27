@@ -37,7 +37,8 @@ in
 
   # ---- 区域 / 语言 -----------------------------------------------------------
   timezone = "Asia/Shanghai";
-  locale = "en_US.UTF-8";                 # 想全中文改成 "zh_CN.UTF-8"
+  locale = "zh_CN.UTF-8";                 # 系统语言（简体中文）；想英文界面改回 "en_US.UTF-8"
+                                          # ⚠️ 改完 just switch 后要【重新登录】才对所有程序生效
   supportedLocales = [
     "en_US.UTF-8/UTF-8"
     "zh_CN.UTF-8/UTF-8"
