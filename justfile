@@ -101,6 +101,26 @@ ime-theme:
     echo "已装主题: $(ls "$HOME/.local/share/fcitx5/themes" 2>/dev/null | tr '\n' ' ')"
     echo "切换方法: vars.nix 里 inputMethod.theme = \"youth\" | \"default\" | \"dark\"，然后 just switch && just ime-restart"
 
+# 清理水杉输入法(MSIME)遗留（已弃用，但它的 systemd 单元是当初
+# msime-linux-setup 装进 ~/.config/systemd/user 的，不在 nix 管理范围内 ——
+# 所以只 pkill 会被 systemd 自动拉回来，必须连单元一起删）
+# 用法：切到 fcitx5+Rime 之后跑一次即可
+msime-clean:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    for u in msime-linux-clipboard.service msime-linux-online.service msime-linux-voice.service \
+             msime-linux-online.socket msime-linux-voice.socket; do
+      systemctl --user stop "$u" 2>/dev/null || true
+      systemctl --user disable "$u" 2>/dev/null || true
+      systemctl --user reset-failed "$u" 2>/dev/null || true
+    done
+    rm -f "$HOME"/.config/systemd/user/*msime* "$HOME"/.config/autostart/*msime* 2>/dev/null || true
+    rm -rf "$HOME/.config/msime-client" "$HOME/.local/share/msime" 2>/dev/null || true
+    pkill -9 -f msime-linux 2>/dev/null || true
+    systemctl --user daemon-reload
+    echo "残留单元: $(systemctl --user list-units --all 2>/dev/null | grep -ci msime) 个（应为 0）"
+    pgrep -af msime-linux || echo "残留进程: 无"
+
 # 输入法体检：一键收集 fcitx5/Rime 关键状态（主题/方案/简繁不生效时先跑这个）
 ime-doctor:
     #!/usr/bin/env bash
