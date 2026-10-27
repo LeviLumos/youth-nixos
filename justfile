@@ -80,6 +80,24 @@ hw:
 ime-setup:
     msime-linux-setup --download
 
+# 安装雾凇拼音 rime-ice（含双拼方案与词库）到 Rime 用户目录
+# 前提：vars.inputMethod.engine = "rime"，且机器能访问 github.com
+#       （克隆用的是 git over https，和平时 git pull 一样，不碰 raw.githubusercontent.com）
+# 默认方案由 dotfiles/rime/default.custom.yaml 指定为雾凇双拼（nix 部署，无需手动改）
+rime-ice:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    dir="$HOME/.local/share/fcitx5/rime"
+    tmp="$(mktemp -d)"
+    trap 'rm -rf "$tmp"' EXIT
+    git clone --depth 1 https://github.com/iDvel/rime-ice "$tmp/rime-ice"
+    mkdir -p "$dir"
+    # 拷入全部方案与词库（default.custom.yaml 是 nix 软链，仓库里没有同名文件，不会覆盖）
+    (cd "$tmp/rime-ice" && tar cf - --exclude=.git --exclude=README.md .) | (cd "$dir" && tar xf -)
+    # 重启 fcitx5 触发 Rime 重新部署
+    fcitx5 -rd >/dev/null 2>&1 || fcitx5 -d >/dev/null 2>&1 || true
+    echo "完成：稍等几秒 Rime 部署完，Ctrl+Space 切换到雾凇双拼"
+
 # 按清单安装 VSCodium 插件（读 ~/.config/VSCodium/extensions.txt）
 code-ext:
     vscodium-install-extensions

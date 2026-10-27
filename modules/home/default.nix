@@ -14,6 +14,7 @@
     ./zsh.nix            # home.file → ~/.zshrc
     ./desktop.nix        # 通知(mako) / 空闲(swayidle) / 托盘(tray-tui)
     ./vscodium.nix       # VSCodium 的 settings/keybindings + 插件安装脚本
+    ./rime.nix           # Rime 默认方案 = 雾凇双拼（词库用 just rime-ice 装）
   ];
 
   home = {
