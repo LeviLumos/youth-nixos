@@ -66,6 +66,53 @@ gc-status:
 store-size:
     df -h / /nix /tmp 2>/dev/null; ls -lh /swapfile 2>/dev/null; du -sh /nix/store 2>/dev/null
 
+# 卸载软件后的【残留清理】
+#   nix 卸载只删 /nix/store 里的包，不会碰 ~/.config、~/.cache、systemd user 单元、
+#   自启动项 —— 这些要自己清（systemd 单元尤其关键：它会自动把已删的程序拉回来）
+# 用法：
+#   just app-purge 关键字          # 只列出来，不删（先看看）
+#   just app-purge 关键字 --rm     # 确认无误后再删
+app-purge keyword mode="":
+    #!/usr/bin/env bash
+    set -uo pipefail
+    kw="{{ keyword }}"
+    echo "== 搜索关键字：$kw =="
+    hits=()
+    for d in "$HOME/.config" "$HOME/.local/share" "$HOME/.cache" "$HOME/.local/state"; do
+      [ -d "$d" ] || continue
+      while IFS= read -r p; do hits+=("$p"); done \
+        < <(find -L "$d" -maxdepth 1 -iname "*$kw*" 2>/dev/null)
+    done
+    for d in "$HOME/.config/systemd/user" "$HOME/.config/autostart"; do
+      [ -d "$d" ] || continue
+      while IFS= read -r p; do hits+=("$p"); done \
+        < <(find -L "$d" -maxdepth 1 -iname "*$kw*" 2>/dev/null)
+    done
+    echo "--- 仍在运行的进程 ---"
+    pgrep -af "$kw" || echo "  无"
+    echo "--- 仍在册的 systemd user 单元 ---"
+    systemctl --user list-units --all --no-legend 2>/dev/null | grep -i "$kw" || echo "  无"
+    echo "--- 目录/文件残留 ---"
+    if [ ${#hits[@]} -eq 0 ]; then echo "  无"; else
+      for p in "${hits[@]}"; do echo "  $p"; done
+    fi
+    if [ "{{ mode }}" != "--rm" ]; then
+      echo; echo "（以上是预演，没删任何东西。确认无误后：just app-purge $kw --rm）"; exit 0
+    fi
+    echo; echo "== 开始清理 =="
+    systemctl --user list-units --all --no-legend 2>/dev/null | grep -i "$kw" \
+      | awk '{print $1}' | while read -r u; do
+        systemctl --user stop "$u" 2>/dev/null || true
+        systemctl --user disable "$u" 2>/dev/null || true
+        systemctl --user reset-failed "$u" 2>/dev/null || true
+      done
+    pkill -9 -f "$kw" 2>/dev/null || true
+    for p in "${hits[@]}"; do rm -rf "$p"; done
+    systemctl --user daemon-reload
+    echo "完成。剩留进程/单元："
+    pgrep -af "$kw" || echo "  进程：无"
+    systemctl --user list-units --all --no-legend 2>/dev/null | grep -i "$kw" || echo "  单元：无"
+
 # 清旧世代 + store 去重（磁盘告急时先跑它）
 free-disk:
     sudo nix-collect-garbage -d
