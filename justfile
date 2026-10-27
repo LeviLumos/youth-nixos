@@ -101,6 +101,45 @@ ime-theme:
     echo "已装主题: $(ls "$HOME/.local/share/fcitx5/themes" 2>/dev/null | tr '\n' ' ')"
     echo "切换方法: vars.nix 里 inputMethod.theme = \"youth\" | \"default\" | \"dark\"，然后 just switch && just ime-restart"
 
+# 输入法体检：一键收集 fcitx5/Rime 关键状态（主题/方案/简繁不生效时先跑这个）
+ime-doctor:
+    #!/usr/bin/env bash
+    d="$HOME/.local/share/fcitx5/rime"
+    echo "== 1. fcitx5 进程 =="
+    pgrep -ax fcitx5 || echo "  ✗ fcitx5 没在跑（fcitx5 -d 启动）"
+    ps -o pid=,lstart= -p "$(pgrep -x fcitx5 | head -1)" 2>/dev/null | sed 's/^/  启动于 /'
+    echo "== 2. 界面主题 =="
+    f="$HOME/.config/fcitx5/conf/classicui.conf"
+    if [ -f "$f" ]; then
+      echo "  $(grep -m1 '^Theme=' "$f")  （→ $(readlink -f "$f")）"
+    else echo "  ✗ 缺 $f —— just switch 没部署上"; fi
+    t="$HOME/.local/share/fcitx5/themes/youth/theme.conf"
+    if [ -f "$t" ]; then grep -m3 '^Color' "$t" | sed 's/^/  /'; else echo "  ✗ 缺 $t"; fi
+    echo "== 3. Rime 方案文件 =="
+    for x in default.custom.yaml double_pinyin_flypy.custom.yaml double_pinyin_flypy.schema.yaml; do
+      [ -f "$d/$x" ] && echo "  ✓ $x" || echo "  ✗ 缺 $x（$x 含 schema 说明 just rime-ice 没跑）"
+    done
+    echo "  当前方案: $(grep -m1 'schema:' "$d/default.custom.yaml" 2>/dev/null | sed 's/^ *//')"
+    echo "== 4. 已保存的开关状态 (user.yaml) =="
+    if [ -f "$d/user.yaml" ]; then cat "$d/user.yaml" | sed 's/^/  /'; else echo "  无 user.yaml"; fi
+    echo "== 5. fcitx5 输入法列表 (profile) =="
+    grep -E 'DefaultIM|^Name=|Name=rime' "$HOME/.config/fcitx5/profile" 2>/dev/null | sed 's/^/  /' || echo "  ✗ 缺 profile —— rm 后 just switch 重写"
+    echo "== 6. 最近一次 Rime 部署时间 =="
+    ls -ld --time-style=+%F\ %T "$d/build" 2>/dev/null | awk '{print "  "$6" "$7}' || echo "  ✗ 无 build 目录（还没部署成功过）"
+
+# 输入法恢复出厂（只清 Rime 的开关记忆与部署缓存，不动用户词库 *.userdb）
+# 用法：主题/简繁/方案改了却不生效、或反复出现繁体时跑一次
+ime-reset:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    d="$HOME/.local/share/fcitx5/rime"
+    pkill -x fcitx5 2>/dev/null || true
+    sleep 1
+    rm -f "$d/user.yaml"        # 清掉「繁体」等被记住的开关状态
+    rm -rf "$d/build"           # 强制 Rime 重新部署（重读所有 custom.yaml 补丁）
+    fcitx5 -d >/dev/null 2>&1 || true
+    echo "已重置并重启 fcitx5，等几秒让 Rime 部署完，Ctrl+Space 试试（应为：深色候选栏 + 简体）"
+
 # 安装/更新雾凇拼音 rime-ice（方案 + 词库）到 Rime 用户目录
 # 前提：输入法已启用（vars.inputMethod.enable = true），且机器能访问 github.com
 #       （克隆用的是 git over https，和平时 git pull 一样，不碰 raw.githubusercontent.com）
