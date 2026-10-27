@@ -14,9 +14,13 @@
 # =============================================================================
 { lib, pkgs, vars, ... }:
 {
-  # ---- ① 默认方案 = 小鹤双拼 --------------------------------------------------
+  # ---- ① 默认方案 = 小鹤双拼 + 强制简体 ----------------------------------------
+  #  default.custom.yaml：schema_list = double_pinyin_flypy
+  #  double_pinyin_flypy.custom.yaml：traditionalization reset 0（每次启动回到简体）
   home.file.".local/share/fcitx5/rime/default.custom.yaml".source =
     ../../dotfiles/rime/default.custom.yaml;
+  home.file.".local/share/fcitx5/rime/double_pinyin_flypy.custom.yaml".source =
+    ../../dotfiles/rime/double_pinyin_flypy.custom.yaml;
 
   # ---- ③ 主题 + 界面配置 ------------------------------------------------------
   home.file.".local/share/fcitx5/themes/youth/theme.conf".source =

@@ -25,9 +25,9 @@ patch:
 
   # ---- 简繁 -------------------------------------------------------------------
   #  默认就是简体（方案里 traditionalization 的 states 是 [简, 繁] 且无 reset）。
-  #  这里把 traditionalization 从「方案选单记忆」里去掉：
-  #  简繁状态不再被写进 user.yaml，每次启动都回到简体；
-  #  临时要打繁体按 Ctrl+Shift+4，用完重启 fcitx5 即恢复简体。
+  #  这里把 traditionalization 从「方案选单记忆」里去掉：状态不再写进 user.yaml；
+  #  配合 double_pinyin_flypy.custom.yaml 的 switches/@2/reset: 0 双保险，
+  #  无论怎么按 Ctrl+Shift+4，重启输入法后都回到简体。
   "switcher/save_options":
     - ascii_punct
     - emoji

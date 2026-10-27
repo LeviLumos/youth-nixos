@@ -1,0 +1,18 @@
+# =============================================================================
+#  Rime 小鹤双拼补丁：强制简体输出
+# -----------------------------------------------------------------------------
+#  部署：home.file → ~/.local/share/fcitx5/rime/double_pinyin_flypy.custom.yaml
+#  作用：给方案 switches 里的 traditionalization（第 3 项，index 2）加 reset: 0，
+#        每次会话启动都重置为「简」。配合 default.custom.yaml 里已把
+#        traditionalization 移出 switcher/save_options（不再写进 user.yaml），
+#        双保险：无论怎么按 Ctrl+Shift+4，重启输入法后都回到简体。
+#
+#  ⚠️ index 依据 rime-ice 的 double_pinyin_flypy.schema.yaml switches 顺序：
+#     0 ascii_mode / 1 ascii_punct / 2 traditionalization / 3 emoji / ...
+#     若未来 rime-ice 改了顺序，更新这里的 @2。
+#
+#  临时要打繁体：Ctrl+Shift+4（只对本次会话有效）
+#  已被存成繁体的老机器：rm ~/.local/share/fcitx5/rime/user.yaml 后 just ime-restart
+# =============================================================================
+patch:
+  "switches/@2/reset": 0
