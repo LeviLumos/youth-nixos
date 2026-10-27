@@ -158,20 +158,14 @@ in
     screenOffAfter = 600;                           # 10 分钟无操作 → 关闭显示器
   };
 
-  # ---- 输入法（默认关闭）------------------------------------------------------
-  #  当前【不安装任何输入法】。
-  #  关闭原因：启用后 nix 要拉 github.com/metasequoiaime/{msime,chinese-ime-lm}，
-  #  国内直连 GitHub 经常失败（之前报过 Truncated tar archive / Failed to fetch git）。
-  #  建议：先装好系统 → 进系统确认能访问 GitHub（或配好代理）→ 再按下面三步开启。
-  #
-  #  开启三步：
-  #    1. flake.nix      取消 msime input 的注释，并在 outputs 参数/specialArgs 里加回 msime
-  #    2. default.nix    取消 ./input-method.nix 的注释
-  #    3. 本文件         enable = true
-  #  然后：sudo nixos-rebuild switch --flake . && msime-linux-setup --download
+  # ---- 输入法 -------------------------------------------------------------------
+  #  默认 fcitx5 + Rime：nixpkgs 自带、走二进制缓存，构建不碰 GitHub。
+  #  想换水杉（MSIME）：engine = "msime"，且要能访问 github.com 与
+  #  raw.githubusercontent.com，并按 flake.nix 注释开启 msime input —— 见 doc/系统需求.md 第九节。
   inputMethod = {
-    enable = false;                       # true = 水杉输入法（fcitx5）
-    framework = "fcitx5";                 # 官方 NixOS 方案只接了 fcitx5
+    enable = true;                       # 输入法总开关
+    framework = "fcitx5";                # NixOS 官方方案目前只接了 fcitx5
+    engine = "rime";                     # "rime"（默认，免构建）/ "msime"（水杉，要 GitHub）
   };
 
   # ---- niri ------------------------------------------------------------------

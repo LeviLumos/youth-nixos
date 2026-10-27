@@ -1,48 +1,53 @@
 # =============================================================================
-#  输入法：水杉输入法（MSIME） https://msime.app/
+#  输入法：fcitx5 + Rime（默认）/ 水杉 MSIME（可选）
 # -----------------------------------------------------------------------------
-#  ⚠️ 本模块【默认不启用】：modules/nixos/default.nix 里已注释掉 import。
-#     启用需要三步：
-#       1. flake.nix      —— 取消 msime input 的注释（并加回 outputs 参数与 specialArgs）
-#       2. default.nix    —— 取消 ./input-method.nix 的注释
-#       3. vars.nix       —— inputMethod.enable = true
-#     启用后首次使用必做（每个用户跑一次，下载约 189MB 词库）：
-#       msime-linux-setup --download
-#     之后用 fcitx5-configtool 添加「水杉输入法」；升级后 fcitx5 -r 或重新登录。
+#  开关：vars.inputMethod.*
+#    engine = "rime"   —— nixpkgs 自带、走二进制缓存，构建不碰 GitHub（默认）
+#    engine = "msime"  —— 水杉输入法 https://msime.app/：
+#                          需能访问 github.com 与 raw.githubusercontent.com，
+#                          且按 flake.nix 注释开启 msime input；
+#                          会从源码编译一整套 Rust + npm 前端，内存/磁盘开销大
 #
-#  ⚠️ NixOS 上官方目前只接了 Fcitx5（没有设置窗口与语音输入）。
+#  用法（装好后第一次）：fcitx5-configtool → 把「Rime」加入输入法列表 →
+#                        Ctrl+Space 切换。Rime 默认方案 = 朙月拼音（luna_pinyin），
+#                        想换雾凇拼音/双拼见 doc/系统需求.md 第九节。
 # =============================================================================
 { lib, inputs, pkgs, vars, ... }:
 
 let
+  im = vars.inputMethod;
+
   # tryPkg：能求值就返回 [ pkg ]，否则返回 []（改名别名 / 不存在都算拿不到）
   #  ⚠️ Nix 的 && 两边都必须是布尔值，所以这里只能用 if，不能写 p != null && ...
   tryPkg = p: if p == null then [ ] else lib.optional (builtins.tryEval p).success p;
+
+  isMsime = im.engine == "msime";
 in
 {
-  # 注入 msime-fcitx5 包（来自 github:metasequoiaime/msime 的 overlay）
-  nixpkgs.overlays = [ inputs.msime.overlays.default ];
+  # msime 的包（msime-fcitx5 / msime-linux-setup）由 msime flake 的 overlay 提供；
+  # rime 用 nixpkgs 自带的包，不需要 overlay。
+  # ⚠️ engine = "msime" 时必须先在 flake.nix 里开启 msime input，
+  #    否则这里没有 overlay，下面取 pkgs.msime-fcitx5 会报「属性不存在」。
+  nixpkgs.overlays = lib.mkIf (isMsime && inputs ? msime) [ inputs.msime.overlays.default ];
 
-  i18n.inputMethod = lib.mkIf vars.inputMethod.enable {
+  i18n.inputMethod = lib.mkIf im.enable {
     enable = true;
-    type = vars.inputMethod.framework;         # "fcitx5"
-    fcitx5.addons = [
-      pkgs.msime-fcitx5
-      # 想保留其它中文输入方案可再加，例如：
-      # pkgs.fcitx5-rime
-    ];
+    type = im.framework;                        # "fcitx5"
+
+    fcitx5.addons =
+      if isMsime
+      then [ pkgs.msime-fcitx5 ]
+      else [
+        pkgs.fcitx5-rime                        # 中州韵 Rime（朙月拼音等）
+        pkgs.fcitx5-chinese-addons              # libpinyin 等老牌方案，多一个备选
+      ];
   };
 
-  # 首次配置与日常管理用到的工具。
-  #  ⚠️ 有些包在 nixpkgs 里被改名/挪位置（如 fcitx5-configtool 在 26.05 挪进了
-  #     qt6Packages，顶层属性变成一碰就 throw 的「改名别名」），所以这里用
-  #     tryEval 探测：拿到就装、拿不到就跳过，绝不因此让整个求值失败。
-  environment.systemPackages = lib.mkIf vars.inputMethod.enable ([
-    pkgs.msime-fcitx5
-  ]
-  ++ tryPkg (pkgs.qt6Packages.fcitx5-configtool or null)   # 图形界面添加输入法
-  ++ tryPkg (pkgs.msime-linux-setup or null)               # --download 下载词库
-  ++ tryPkg (pkgs.fcitx5-gtk or null));                    # GTK 程序的 IM 模块
+  # 图形界面管理输入法列表；msime 另带词库下载工具
+  environment.systemPackages = lib.mkIf im.enable (
+    tryPkg (pkgs.qt6Packages.fcitx5-configtool or null)   # 26.05 挪进了 qt6Packages
+    ++ lib.optionals isMsime (tryPkg (pkgs.msime-linux-setup or null))   # --download 词库
+  );
 
   # 说明：GTK_IM_MODULE / QT_IM_MODULE / XMODIFIERS 三个环境变量
   #       由 i18n.inputMethod 自动设置，这里【不要再重复定义】，否则会冲突报错。

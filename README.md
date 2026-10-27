@@ -59,11 +59,10 @@ just gc       # 清理 30 天前旧世代
 | 锁屏 | swaylock（`super+alt+l`） |
 | 通知 | mako |
 | 托盘 | tray-tui（`super+shift+t`，终端内） |
-| 输入法 | 默认不安装；装好系统后按 `doc/系统需求.md` 三步开启（水杉 MSIME + fcitx5） |
+| 输入法 | fcitx5 + Rime（nixpkgs 自带，免构建；`vars.inputMethod.engine` 可换水杉 MSIME） |
 
 > 状态栏（waybar）已移除；需要可自行加回，步骤见 `doc/系统需求.md` 第九节。
-> 输入法默认关闭：启用后需从 GitHub 拉 `msime` 与 `chinese-ime-lm` 两个仓库，
-> 安装阶段易失败，建议进系统后再开。
+> 输入法默认 Rime（构建不碰 GitHub）；水杉 MSIME 需能访问 GitHub 且构建重，见 `doc/系统需求.md` 第九节。
 
 ## 文档
 

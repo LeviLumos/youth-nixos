@@ -76,8 +76,7 @@ free-disk:
 hw:
     sudo nixos-generate-config --show-hardware-config > hosts/{{ hostname }}/hardware-configuration.nix
 
-# 水杉输入法首次配置：下载词库并加入 fcitx5
-# ⚠️ 需先启用输入法（vars.inputMethod.enable=true）
+# 水杉输入法词库下载（仅 engine = "msime" 时需要；rime 无需任何首次配置）
 ime-setup:
     msime-linux-setup --download
 
