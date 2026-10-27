@@ -107,11 +107,17 @@ ime-doctor:
     d="$HOME/.local/share/fcitx5/rime"
     echo "== 1. fcitx5 进程 =="
     ps -eo pid,user,lstart,cmd | grep '[f]citx5' | sed 's/^/  /' || echo "  ✗ 没有 fcitx5 进程（fcitx5 -d 启动）"
-    # ⚠️ 不能只看进程：老实例可能还占着 D-Bus 名字，新实例会因重名起不来
-    dbus_pid="$(busctl --user status org.fcitx.Fcitx5 2>/dev/null | grep -m1 '^PID' | awk '{print $2}')"
-    if [ -n "$dbus_pid" ]; then
-      echo "  ✓ D-Bus 名字持有者 PID=$dbus_pid（$(ps -o lstart= -p "$dbus_pid" 2>/dev/null)）"
-      echo "    ⚠️ 若这个 PID 启动时间早于你最后一次 just switch，它用的还是旧配置：kill -9 $dbus_pid 后 fcitx5 -d"
+    # ⚠️ 不能只看进程：老实例可能还占着 D-Bus 名字，新实例会因重名起不来。
+    #    用 GetNameOwner 标准查询（busctl status 的输出格式随版本变，别依赖）
+    dbus_owner="$(busctl --user call org.freedesktop.DBus /org/freedesktop/DBus \
+      org.freedesktop.DBus.GetNameOwner s org.fcitx.Fcitx5 2>/dev/null | tr -d '"')"
+    if [ -n "$dbus_owner" ]; then
+      dbus_pid="$(pgrep -f fcitx5 | while read -r p; do
+        [ "$(cat /proc/$p/comm 2>/dev/null)" = "fcitx5" ] && echo "$p" && break
+      done)"
+      echo "  ✓ D-Bus 名字被持有（唯一名 $dbus_owner，进程 PID=${dbus_pid:-?}）"
+      [ -n "$dbus_pid" ] && echo "    启动时间: $(ps -o lstart= -p "$dbus_pid" 2>/dev/null)"
+      echo "    ⚠️ 若启动时间早于最后一次 just switch → kill -9 $dbus_pid 后 fcitx5 -d"
     else
       echo "  ✗ D-Bus 上 org.fcitx.Fcitx5 无人持有 —— fcitx5 实际不可用"
     fi
