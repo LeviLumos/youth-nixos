@@ -115,6 +115,10 @@ ime-doctor:
     else
       echo "  ✗ D-Bus 上 org.fcitx.Fcitx5 无人持有 —— fcitx5 实际不可用"
     fi
+    echo "== 1.5 会话环境（手动从终端起 fcitx5 常缺这个，会导致 Wayland 应用用不了输入法）=="
+    echo "  WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-<空>}  DISPLAY=${DISPLAY:-<空>}"
+    [ -n "${WAYLAND_DISPLAY:-}" ] || echo "  ✗ 没有 WAYLAND_DISPLAY —— 别手动 fcitx5 -d，重新登录让会话拉起"
+    echo "  msime 残留: $(pgrep -af msime-linux-clipboard | head -1 || echo 无)"
     echo "== 2. 界面主题 =="
     f="$HOME/.config/fcitx5/conf/classicui.conf"
     if [ -f "$f" ]; then
