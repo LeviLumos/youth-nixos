@@ -181,7 +181,11 @@ in
     cornerRadius = 0;                     # 无圆角（需求）
     terminal = "kitty";                   # super+t 启动的终端
     launcher = "fuzzel";                  # super+space 启动的应用启动器
-    autoLogin = true;                     # true = 开机经 greetd+tuigreet 免密直进 niri
+    #   true  → 开机免密直进 niri（tuigreet 不露面，退出 niri 后 tty1 空着）
+    #   false → 开机出登录界面 tuigreet：选用户 + 输密码；
+    #           退出 niri（super+shift+E）自动回到 tuigreet = 可以切换用户
+    #           想「切换用户」就用 false
+    autoLogin = true;
   };
 
   # ---- 字体 ------------------------------------------------------------------

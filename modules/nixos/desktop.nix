@@ -75,18 +75,20 @@ in
   };
 
   # ---- greetd + tuigreet（登录管理器）----------------------------------------
-  #  greetd 的待遇由 vars.nix 的 niri.autoLogin 决定：
-  #    true  → 开机免密直接进 niri（用 initial_session）
-  #    false → 完全不装 greetd：TTY 登录后手动执行 niri-session
+  #  【始终安装】greetd，由 vars.nix 的 niri.autoLogin 决定它怎么表现：
+  #    true  → 开机免密直进 niri（多一条 initial_session），tuigreet 全程不露面；
+  #            退出 niri 后 tty1 会空着（initial_session 时 Restart 必须关掉，
+  #            否则「退出 → 又被自动登录」死循环），要登录界面就去
+  #            Ctrl+Alt+F2 登录，再 sudo systemctl restart greetd。
+  #    false → 开机就是 tuigreet（选用户 + 输密码）；Super+Shift+E 退出 niri
+  #            自动回到 tuigreet —— 这才是能「切换用户」的模式。
   #
-  #  两种模式下 tuigreet 都是「登录界面」本身；autoLogin=true 时它只在
-  #  手动 systemctl restart greetd / 关掉自动登录后才会真正露面。
-  #  ⚠️ greetd 模块在 settings 含 initial_session 时会自动关掉 restart，
-  #     避免「退出 niri → 又被自动登录」的死循环；所以退出 niri 后
-  #     tty1 会空着，用 ctrl+alt+F2 登录后再 sudo systemctl restart greetd 即可。
-  services.greetd = lib.mkIf vars.niri.autoLogin {
+  #  ⚠️ restart 必须显式写：模块默认会在有 initial_session 时关掉它，
+  #     这里按 autoLogin 明确取值，行为可预期（false 时回到登录界面）。
+  services.greetd = {
     enable = true;
     useTextGreeter = true;                    # tuigreet 是 TUI：避免 systemd 启动日志打乱界面
+    restart = !vars.niri.autoLogin;
 
     settings = {
       # 登录界面：tuigreet（--time 显示时间，--remember 记住上次登录的用户）
@@ -94,7 +96,7 @@ in
         user = "greeter";                     # 该用户由 greetd 模块自动创建
         command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd ${niriSession}";
       };
-
+    } // lib.optionalAttrs vars.niri.autoLogin {
       # 开机自动登录（只跑一次）
       initial_session = {
         user = vars.username;
